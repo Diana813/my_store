@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ColorsMyStore {
-  static const PrimaryColor = 0xFF2AD2A0;
- // 0xFFEE6F57 0xFF2AD2A0
+  static const PrimaryColor =0xFF89ACBE/*0xFF849FBC*/ /*0xFF7E6A75*/;
+  static const AccentColor = 0xFF88D5E4;
   static Map<int, Color> color =
   {
      50:Color.fromRGBO(42,210,160, .1),
