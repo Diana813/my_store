@@ -1,29 +1,40 @@
 import 'dart:io';
+
 import 'package:excel/excel.dart';
 import 'package:my_store/models/product_model.dart';
 
 class ReadExcelFile {
+  static List<Product> excelData = [];
+  static var bytes;
+  static var excel;
+
   static List<Product> readExcel(var file) {
-    List<Product> excelData = <Product>[];
-    var bytes = File(file).readAsBytesSync();
-    var excel = Excel.decodeBytes(bytes);
+    excelData = <Product>[];
+    bytes = File(file).readAsBytesSync();
+    excel = Excel.decodeBytes(bytes);
 
     for (var table in excel.tables.keys) {
       print(table); //sheet Name
       print(excel.tables[table].maxCols);
       print(excel.tables[table].maxRows);
 
+      String shipment = excel.tables[table]
+          .cell(CellIndex.indexByString("F2"))
+          .value
+          .toString();
+
       for (int i = 2; i < excel.tables[table].maxRows; i++) {
         if (excel.tables[table]
-            .cell(CellIndex.indexByString("X1"))
-            .value
-            .toString() !=
+                .cell(CellIndex.indexByString("X1"))
+                .value
+                .toString() !=
             "EAN") {
           excelData = null;
           break;
         }
+
         final product = Product(
-            isDone: false,
+            shipmentDate: shipment,
             ASIN: excel.tables[table]
                 .cell(CellIndex.indexByString("V$i"))
                 .value

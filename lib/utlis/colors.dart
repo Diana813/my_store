@@ -1,3 +1,4 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 
 class ColorsMyStore {
@@ -16,5 +17,18 @@ class ColorsMyStore {
     800:Color.fromRGBO(42,210,160, .9),
     900:Color.fromRGBO(42,210,160, 1),
   };
+
+  static var buttonColors = WindowButtonColors(
+      iconNormal: Color(0xFF89ACBE),
+      mouseOver: Color(0xFF88D5E4),
+      mouseDown: Color(0xFF89ACBE),
+      iconMouseOver: Color(0xFF89ACBE),
+      iconMouseDown: Color(0xFF88D5E4));
+
+  static var closeButtonColors = WindowButtonColors(
+      mouseOver: Colors.red[700],
+      mouseDown: Colors.red[900],
+      iconNormal: Color(0xFF89ACBE),
+      iconMouseOver: Colors.white);
 
 }

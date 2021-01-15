@@ -5,10 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:my_store/widgets/popup_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
 class NetworkSearchBrain {
-
-  static launchURLAmazon(String url) async {
+  static launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -16,29 +14,14 @@ class NetworkSearchBrain {
     }
   }
 
-  static launchURLCeneo(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  static launchURLGoogle(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  static checkResponseAmazon(String url, String message, String advice, BuildContext context) async {
+  static checkResponseAmazon(
+      String url, String message, String advice, BuildContext context) async {
     final response = await http.get(url);
 
     int responseCode = response.statusCode;
     print(responseCode);
     if (responseCode == 200) {
-      launchURLAmazon(url);
+      launchURL(url);
       EasyLoading.dismiss();
     } else {
       print(responseCode);
@@ -54,7 +37,7 @@ class NetworkSearchBrain {
     }
   }
 
-  static List<String> findCeneoString(String name, int index, var items) {
+  static String findCeneoString(String name, int index, var items) {
     String name = items.elementAt(index).name;
     final iReg = RegExp(r'(\d+)');
     String numbers = iReg.allMatches(name).map((m) => m.group(0)).join(' ');
@@ -67,21 +50,26 @@ class NetworkSearchBrain {
     }
 
     List<String> newName = name.split(' ');
-    List<String> finalName = [];
+    List<String> nameArray = [];
 
     for (String substring in newName) {
       if (substring.contains(number)) {
-        finalName.add(substring);
+        nameArray.add(substring);
         if (number2 != null &&
             newName
                 .elementAt(newName.indexOf(substring) + 1)
                 .contains(number2)) {
-          finalName.add(newName.elementAt(newName.indexOf(substring) + 1));
+          nameArray.add(newName.elementAt(newName.indexOf(substring) + 1));
         }
         break;
       } else {
-        finalName.add(substring);
+        nameArray.add(substring);
       }
+    }
+
+    String finalName = '';
+    for (String string in nameArray) {
+      finalName = finalName + string + ' ';
     }
     return finalName;
   }

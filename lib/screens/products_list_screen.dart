@@ -1,17 +1,24 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter/rendering.dart';
+import 'package:my_store/brain/mySql.dart';
+import 'package:my_store/brain/products_list_brain.dart';
 import 'package:my_store/models/product_model.dart';
+import 'package:my_store/screens/welcome_screen.dart';
+import 'package:my_store/widgets/app_window.dart' as app_window;
+import 'package:my_store/widgets/count_min_prices_dialog.dart';
 import 'package:my_store/widgets/list_header.dart';
-import 'package:my_store/widgets/list_item.dart';
-
-import '../brain/network_search_brain.dart';
-import '../utlis/colors.dart';
+import 'package:my_store/widgets/text_field_my_store.dart';
+import 'package:my_store/widgets/whole_list.dart';
+import 'package:my_store/widgets/window_buttons.dart';
+import 'package:mysql1/mysql1.dart' as mysql;
 
 class Products_Page extends StatefulWidget {
-  Products_Page({Key key, this.productsList}) : super(key: key);
+  Products_Page({Key key, this.productsList, this.filePath}) : super(key: key);
   final productsList;
+  final filePath;
 
   @override
   _Products_PageState createState() => new _Products_PageState();
@@ -19,16 +26,88 @@ class Products_Page extends StatefulWidget {
 
 class _Products_PageState extends State<Products_Page> {
   TextEditingController editingController = TextEditingController();
-  String filePath = '';
-  var bytes = null;
+  DateTime now = DateTime.now();
   Icon actionIcon = new Icon(Icons.search);
   Widget appBarTitle = new Text("AppBar Title");
-  var items = <Product>[];
+  static var items = <Product>[];
+  static String euroRate = '';
+  static String newRetail = '';
+  static String margin = '';
+  static bool dataLoaded;
+  static bool loaded;
+  ScrollController _controller = ScrollController();
+  Product product = new Product();
+  bool atAuctionValue = false;
+  bool soldValue = false;
 
   @override
   void initState() {
+    dataLoaded = false;
+    loaded = false;
+    if (widget.filePath == null) {
+      items = [];
+    }
     items.addAll(widget.productsList);
+    if (loaded != null) {
+      _checkIfDataAreLoaded();
+    }
+
     super.initState();
+    ProductsListBrain.createDBPricesTable();
+    _readPricesData();
+    _loadExcelDataToDb();
+  }
+
+  _checkIfDataAreLoaded() async {
+    setState(() {
+      print('loaded z checkifDataAreLoaded');
+      print(loaded);
+      if (loaded) {
+        dataLoaded = true;
+        print('dataloaded z checkifDataAreLoaded');
+        print(dataLoaded);
+      } else {
+        dataLoaded = false;
+        print('dataloaded z checkifDataAreLoaded');
+        print(dataLoaded);
+      }
+    });
+  }
+
+  _loadExcelDataToDb() async {
+    print("ścieżka przy tworzeniu tabeli excel:");
+    print(widget.filePath);
+    items = [];
+    await items.addAll(widget.productsList);
+    loaded = await ProductsListBrain.createDBExcelTable(widget.filePath, items);
+
+    print('loaded:');
+    print(loaded);
+    if (mounted) {
+      setState(() {
+        dataLoaded = true;
+      });
+    }
+  }
+
+  _readPricesData() async {
+    if (items.isNotEmpty) {
+      print(items.elementAt(0).shipmentDate);
+      var result = await MySql.readFromPricesTable(
+          items.elementAt(0).shipmentDate, await WelcomeScreen.connection);
+      print(result.toString());
+      //mounted prevents memory leak here
+      if (result != null && mounted) {
+        setState(() {
+          for (var row in result) {
+            euroRate = row[0].toString();
+            print(euroRate);
+            newRetail = row[1].toString();
+            margin = row[2].toString();
+          }
+        });
+      }
+    }
   }
 
   void _filterSearchResults(String query, List<Product> productsList) {
@@ -63,84 +142,148 @@ class _Products_PageState extends State<Products_Page> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: AppBar(
-        title: Text('My Store'),
-      ),
-      body: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            children: <Widget>[
-              TextField(
-                onChanged: (value) {
-                  _filterSearchResults(value, widget.productsList);
-                },
-                controller: editingController,
-                decoration: InputDecoration(
-                    labelText: "Wyszukaj",
-                    hintText: "Wyszukaj",
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(25.0)))),
-              ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: MaterialColor(
-                          ColorsMyStore.PrimaryColor, ColorsMyStore.color),
-                      width: 1.0,
-                    ),
-                  ),
-                ),
-                child: ListHeaderMyStore(),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    EasyLoading.dismiss();
-                    return ListItemMyStore(
-                      EAN: items.elementAt(index).EAN,
-                      name: items.elementAt(index).name,
-                      totalRetail: items.elementAt(index).totalRetail,
-                      LPN: items.elementAt(index).LPN,
-                      launchURLAmazon: () {
-                        EasyLoading.show();
-                        /*_progress=0;
-                        EasyLoading.showProgress(_progress,
-                            status: '${(_progress * 100).toStringAsFixed(0)}%');
-                        _progress += 0.03;*/
-                        String ASIN = items.elementAt(index).ASIN;
-                        NetworkSearchBrain.checkResponseAmazon(
-                            'https://amazon.com/dp/$ASIN',
-                            'Tego produktu nie ma już w sprzedaży w sklepie Amazon',
-                            'Poszukaj w Google',
-                            context);
+    return WindowBorder(
+      color: Colors.black87,
+      width: 1,
+      child: app_window.AppWindow(
+        new Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.chevron_left),
+              onPressed: () async {
+                if (loaded != null) await _checkIfDataAreLoaded();
+                print('dataloaded when back button clicked:');
+                print(dataLoaded);
+                Navigator.pop(context, dataLoaded);
+              },
+            ),
+            title: Text('My Store'),
+            actions: [
+              FlatButton(
+                onPressed: () {
+                  String myEuro;
+                  String myRetail;
+                  String myMargin;
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => CountPrices(
+                      onChangeEuroValue: (value) {
+                        myEuro = value;
                       },
-                      launchURLCeneo: () {
-                        String name = items.elementAt(index).name;
-                        List<String> finalName =
-                            NetworkSearchBrain.findCeneoString(
-                                name, index, items);
+                      euroRate: euroRate,
+                      newRetail: newRetail,
+                      onChangeNewRetailValue: (value) {
+                        myRetail = value;
+                      },
+                      margin: margin,
+                      onChangeMarginValue: (value) {
+                        myMargin = value;
+                      },
+                      onSubmitted: () async {
+                        setState(() {
+                          if (myEuro != null &&
+                              myRetail != null &&
+                              myMargin != null) {
+                            euroRate = myEuro;
+                            newRetail = myRetail;
+                            margin = myMargin;
+                          }
+                        });
 
-                        NetworkSearchBrain.launchURLCeneo(
-                            'https://ceneo.pl/;szukaj-$finalName');
+                        DateTime date =
+                            new DateTime(now.year, now.month, now.day);
+                        if (myEuro != null &&
+                            myRetail != null &&
+                            myMargin != null) {
+                          mysql.MySqlConnection connection =
+                              await MySql.dBconnection();
+
+                          MySql.insertDataToPrices(
+                              connection,
+                              euroRate,
+                              newRetail,
+                              margin,
+                              date.toString().substring(0, 10),
+                              items.elementAt(0).shipmentDate);
+                        }
+
+                        Navigator.of(context).pop();
                       },
-                      launchURLGoogle: () {
-                        String name = items.elementAt(index).name;
-                        NetworkSearchBrain.launchURLGoogle(
-                            'https://google.com/search?q=Ceneo Amazon $name');
-                      },
-                    );
-                  },
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Icon(Icons.add),
                 ),
               ),
             ],
           ),
+          body: Container(
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                children: <Widget>[
+                  TextFieldMyStore(
+                    onChange: (value) {
+                      _filterSearchResults(value, widget.productsList);
+                    },
+                    textEditingController: editingController,
+                    label: "Wyszukaj",
+                    hint: "Wyszukaj",
+                    leadingIcon: Icon(Icons.search),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: ListHeaderMyStore(),
+                  ),
+                  Expanded(
+                    child: WholeList(
+                      controller: _controller,
+                      euroRate: euroRate,
+                      newRetail: newRetail,
+                      margin: margin,
+                      items: items,
+                      at_the_auction_check_box: Checkbox(
+                        onChanged: (bool value) {
+                          setState(() {
+                            atAuctionValue = value;
+                          });
+                        },
+                        value: atAuctionValue,
+                      ),
+                      sold_check_box: Checkbox(
+                        onChanged: (bool value) {
+                          setState(() {
+                            soldValue = value;
+                          });
+                        },
+                        value: soldValue,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        WindowButtons(
+          closeButtonOnPressed: () async {
+            if (loaded != null) _checkIfDataAreLoaded();
+
+            print("czy data loaded?");
+            print(dataLoaded);
+            if (dataLoaded) {
+              ProductsListBrain.closeApp();
+            } else {
+              String tableName = items
+                  .elementAt(0)
+                  .shipmentDate
+                  .substring(0, 10)
+                  .replaceAll('-', '_');
+              ProductsListBrain.showAlertBeforeClosing(context, tableName);
+            }
+          },
         ),
       ),
     );

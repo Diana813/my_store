@@ -1,5 +1,7 @@
 class Product {
-  bool isDone;
+  bool at_the_auction;
+  bool sold;
+  final String shipmentDate;
   final String ASIN;
   final String EAN;
   final String name;
@@ -7,14 +9,13 @@ class Product {
   final String LPN;
 
   Product(
-      {this.isDone = false,
+      {this.at_the_auction = false,
+      this.sold = false,
+      this.shipmentDate,
       this.ASIN,
       this.EAN,
       this.name,
       this.totalRetail,
       this.LPN});
 
-  void toggleDone() {
-    isDone = !isDone;
-  }
 }

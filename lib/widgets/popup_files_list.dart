@@ -1,17 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class PopUpDialog extends StatelessWidget {
+class PopUpDialogList extends StatelessWidget {
   final BuildContext context;
   final String message;
-  final String advice;
-  final Widget flatButton;
+  final List<String> filesList;
+  final bool listIsNotEmpty;
+  final Widget listWidget;
 
-  PopUpDialog(
+  PopUpDialogList(
       {@required this.context,
       @required this.message,
-      @required this.advice,
-      this.flatButton});
+      this.filesList,
+      @required this.listIsNotEmpty,
+      @required this.listWidget});
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +23,19 @@ class PopUpDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(advice),
+          listIsNotEmpty
+              ? Container(
+                  child: listWidget,
+                  width: 200,
+                  height: 200,
+                )
+              : ListTile(
+                  leading: Image.asset('assets/images/empty_list.png'),
+                  title: Text('Brak plików do wyświetlenia.'),
+                )
         ],
       ),
       actions: <Widget>[
-        flatButton,
         new FlatButton(
           onPressed: () {
             Navigator.of(context).pop();
