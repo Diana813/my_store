@@ -7,38 +7,54 @@ import 'package:url_launcher/url_launcher.dart';
 
 class NetworkSearchBrain {
   static launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
+    try {
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (PlatformException) {
+      url = url.replaceAll('%', '');
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch $url';
+      }
     }
   }
 
-  static checkResponseAmazon(
-      String url, String message, String advice, BuildContext context) async {
-    final response = await http.get(url);
+  static checkResponseAmazon(String ASIN, BuildContext context) async {
+    List<String> countryCode = ['co.uk', 'it', 'de', 'fr', 'es', 'pl'];
 
-    int responseCode = response.statusCode;
-    print(responseCode);
-    if (responseCode == 200) {
-      launchURL(url);
-      EasyLoading.dismiss();
-    } else {
-      print(responseCode);
+    bool success;
+    for (String code in countryCode) {
+      String url = 'https://amazon.$code/dp/$ASIN';
+      final response = await http.get(url);
+      int responseCode = response.statusCode;
+      if (responseCode == 200) {
+        launchURL(url);
+        EasyLoading.dismiss();
+        success = true;
+        break;
+      }
+      success = false;
+    }
+
+    if (success == false) {
+      print('Nie znaleziono produktu w bazie Amazona');
       EasyLoading.dismiss();
       showDialog(
         context: context,
         builder: (BuildContext context) => PopUpDialog(
           context: context,
-          message: message,
-          advice: advice,
+          message: 'Tego produktu nie ma już w sprzedaży w sklepie Amazon',
+          advice: 'Poszukaj w Google',
         ),
       );
     }
   }
 
-  static String findCeneoString(String name, int index, var items) {
-    String name = items.elementAt(index).name;
+  static String findCeneoString(String name) {
     final iReg = RegExp(r'(\d+)');
     String numbers = iReg.allMatches(name).map((m) => m.group(0)).join(' ');
 
@@ -53,9 +69,10 @@ class NetworkSearchBrain {
     List<String> nameArray = [];
 
     for (String substring in newName) {
-      if (substring.contains(number)) {
+      if (substring.contains(number) && number != '') {
         nameArray.add(substring);
         if (number2 != null &&
+            (newName.indexOf(substring) + 1) != newName.length &&
             newName
                 .elementAt(newName.indexOf(substring) + 1)
                 .contains(number2)) {
@@ -71,6 +88,7 @@ class NetworkSearchBrain {
     for (String string in nameArray) {
       finalName = finalName + string + ' ';
     }
+
     return finalName;
   }
 }

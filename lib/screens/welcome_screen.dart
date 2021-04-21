@@ -5,11 +5,12 @@ import 'package:file_selector_platform_interface/file_selector_platform_interfac
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:my_store/brain/file_picker_brain.dart';
-import 'package:my_store/brain/mySql.dart';
-import 'package:my_store/brain/read_excel_file.dart';
-import 'package:my_store/brain/welcome_screen_brain.dart';
-import 'package:my_store/models/product_model.dart';
+import 'package:my_store/action_display_list_of_items/models/product_model.dart';
+import 'package:my_store/action_mysql/mySql.dart';
+import 'package:my_store/action_open_file/brain/file_picker_brain.dart';
+import 'package:my_store/action_open_file/brain/read_file.dart';
+import 'package:my_store/action_open_file/brain/welcome_screen_brain.dart';
+import 'package:my_store/action_post/allegro_api/authentication.dart';
 import 'package:my_store/utlis/colors.dart';
 import 'package:my_store/widgets/raised_button_my_store.dart';
 import 'package:mysql1/mysql1.dart' as mysql;
@@ -33,6 +34,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     filePath = '';
     _loading = false;
     _setFiles();
+    //AuthenticateClient authenticateClient = new AuthenticateClient();
+    //authenticateClient.createClient();
+
     super.initState();
   }
 
@@ -64,7 +68,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   static Future<List<Product>> computeFunction(String filePath) async {
-    var response = await ReadExcelFile.readExcel(filePath);
+    var response = await ReadFile.readFile(filePath);
     return response;
   }
 
@@ -133,7 +137,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ),
         onSubmitted: (value) async {
           setState(() {
-            if (!value.contains('xlsx') && !value.contains('xls')) {
+            if (!value.contains('xlsx') && !value.contains('xls') && !value.contains('csv')) {
               WelcomeScreenBrain.showAlertIfFileIsWrong(context);
               _loading = false;
             } else if (value.startsWith('"')) {

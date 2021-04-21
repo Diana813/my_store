@@ -2,34 +2,45 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ListItemMyStore extends StatelessWidget {
-  final Widget at_the_auction_check_box;
-  final Widget sold_check_box;
+  final bool at_the_auction_value;
+  final bool sold_value;
+  final Function at_the_auction_on_change;
+  final Function sold_on_change;
   final String EAN;
   final String name;
   final String totalRetail;
   final String minRetail;
   final String LPN;
+  final Function onTap;
   final Function launchURLAmazon;
   final Function launchURLCeneo;
   final Function launchURLGoogle;
   final Function launchURLAllegro;
+  final Function launchURLYouTube;
 
   ListItemMyStore(
-      {@required this.at_the_auction_check_box,
-      @required this.sold_check_box,
+      {@required this.at_the_auction_value,
+      @required this.sold_value,
+      @required this.at_the_auction_on_change,
+      @required this.sold_on_change,
       @required this.EAN,
       @required this.name,
       @required this.totalRetail,
       @required this.minRetail,
       @required this.LPN,
+      @required this.onTap,
       @required this.launchURLAmazon,
       @required this.launchURLCeneo,
       @required this.launchURLGoogle,
-      @required this.launchURLAllegro});
+      @required this.launchURLAllegro,
+      @required this.launchURLYouTube});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return InkWell(
+      onTap: onTap,
+      child:
+        Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
@@ -37,14 +48,21 @@ class ListItemMyStore extends StatelessWidget {
           flex: 2,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
-            children: [Text("Wystawiono"), at_the_auction_check_box],
+            children: [
+              Text("Wystawiono"),
+              Checkbox(
+                  value: at_the_auction_value, onChanged: at_the_auction_on_change)
+            ],
           ),
         ),
         Expanded(
           flex: 2,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
-            children: [Text("Sprzedano"), sold_check_box],
+            children: [
+              Text("Sprzedano"),
+              Checkbox(value: sold_value, onChanged: sold_on_change)
+            ],
           ),
         ),
         Expanded(
@@ -95,42 +113,55 @@ class ListItemMyStore extends StatelessWidget {
         ),
         Expanded(
           flex: 3,
-          child: GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: RaisedButton(
-                  onPressed: launchURLAmazon,
-                  child: Image.asset('assets/images/amazon_logo.png'),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: false,
+              childAspectRatio: MediaQuery.of(context).size.width /
+                  MediaQuery.of(context).size.height,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: RaisedButton(
+                    onPressed: launchURLAmazon,
+                    child: Image.asset('assets/images/amazon_logo.png'),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: RaisedButton(
-                  onPressed: launchURLCeneo,
-                  child: Image.asset('assets/images/ceneo_logo.png'),
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: RaisedButton(
+                    onPressed: launchURLCeneo,
+                    child: Image.asset('assets/images/ceneo_logo.png'),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: RaisedButton(
-                  onPressed: launchURLGoogle,
-                  child: Image.asset('assets/images/google_logo.png'),
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: RaisedButton(
+                    onPressed: launchURLGoogle,
+                    child: Image.asset('assets/images/google_logo.png'),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: RaisedButton(
-                  onPressed: launchURLAllegro,
-                  child: Image.asset('assets/images/allegro_logo.png'),
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: RaisedButton(
+                    onPressed: launchURLAllegro,
+                    child: Image.asset('assets/images/allegro_logo.png'),
+                  ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: RaisedButton(
+                    onPressed: launchURLYouTube,
+                    child: Image.asset('assets/images/you_tube.png'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
+       ),
     );
   }
 }

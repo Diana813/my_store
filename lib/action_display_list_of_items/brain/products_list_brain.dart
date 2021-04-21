@@ -1,12 +1,15 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:my_store/models/product_model.dart';
+import 'package:my_store/action_display_list_of_items/models/product_model.dart';
+import 'package:my_store/action_mysql/items_table.dart';
+import 'package:my_store/action_mysql/mySql.dart';
+import 'package:my_store/action_mysql/prices_table.dart';
+import 'package:my_store/screens/allegro_form_screen.dart';
 import 'package:my_store/screens/welcome_screen.dart';
 import 'package:my_store/widgets/popup_dialog.dart';
 import 'package:mysql1/mysql1.dart';
 
-import 'mySql.dart';
 
 class ProductsListBrain {
   static String displayMinPrize(
@@ -74,7 +77,8 @@ class ProductsListBrain {
 
   static createDBExcelTable(String filePath, List<Product> items) async {
     if (filePath != null && filePath != '' && filePath != 'a') {
-      return await MySql.addExcelToDb(await WelcomeScreen.connection, items);
+      return await ItemsTable.addItemsToDb(
+          await WelcomeScreen.connection, items);
       /*return await MySql.checkIfAllExcelDataAreLoadedToDB(
           items.elementAt(0).shipmentDate.substring(0, 10).replaceAll('-', '_'),
           await WelcomeScreen.connection,
@@ -83,6 +87,20 @@ class ProductsListBrain {
   }
 
   static createDBPricesTable() async {
-    MySql.createTablePrices(await WelcomeScreen.connection);
+    PricesTable.createTablePrices(await WelcomeScreen.connection);
+  }
+
+  static Future<bool> goToAllegroScreen(
+      List<Product> items, BuildContext context, int index) async {
+    bool result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => new AllegroForm(
+                product: items.elementAt(index),
+              )),
+    );
+    print('go to allegro screen result');
+    print(result);
+    return result;
   }
 }

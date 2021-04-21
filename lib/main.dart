@@ -2,11 +2,12 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:my_store/brain/products_list_brain.dart';
-import 'package:my_store/screens/welcome_screen.dart';
 import 'package:my_store/utlis/colors.dart';
 import 'package:my_store/widgets/app_window.dart' as app_window;
 import 'package:my_store/widgets/window_buttons.dart';
+
+import 'action_display_list_of_items/brain/products_list_brain.dart';
+import 'screens/welcome_screen.dart';
 
 void main() {
   runApp(MyApp());

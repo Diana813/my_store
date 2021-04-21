@@ -40,6 +40,11 @@ dependencies:
   mysql1: ^0.17.1
   bitsdojo_window: any
   draggable_scrollbar: ^0.0.4
+  oauth2: ^1.6.3
+  dio: ^3.0.10
+  csv: ^4.1.0
+  path_provider: ^1.6.28
+  flutterintent: ^1.0.0
 
 
 

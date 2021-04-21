@@ -1,13 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:my_store/models/product_model.dart';
+import 'package:my_store/action_display_list_of_items/models/product_model.dart';
+import 'package:my_store/action_mysql/items_table.dart';
+import 'package:my_store/action_mysql/mySql.dart';
 import 'package:my_store/screens/products_list_screen.dart';
 import 'package:my_store/screens/welcome_screen.dart';
 import 'package:my_store/utlis/colors.dart';
 import 'package:my_store/widgets/popup_dialog.dart';
 import 'package:my_store/widgets/popup_files_list.dart';
 
-import 'mySql.dart';
 
 class WelcomeScreenBrain {
   static getFiles(List<String> files) async {
@@ -84,7 +85,7 @@ class WelcomeScreenBrain {
                   print(currentDocumentLoaded);
                 } else {*/
 
-                items = await MySql.readExcelDataFromDBTable(
+                items = await ItemsTable.readItemsDataFromDBTable(
                     await WelcomeScreen.connection, files.elementAt(index));
                 Navigator.pop(context);
                 goToProductsList(items, context, null);

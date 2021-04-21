@@ -3,17 +3,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:my_store/brain/mySql.dart';
-import 'package:my_store/brain/products_list_brain.dart';
-import 'package:my_store/models/product_model.dart';
+import 'package:my_store/action_display_list_of_items/brain/products_list_brain.dart';
+import 'package:my_store/action_display_list_of_items/models/product_model.dart';
+import 'package:my_store/action_mysql/checkbox_table.dart';
+import 'package:my_store/action_mysql/mySql.dart';
+import 'package:my_store/action_mysql/prices_table.dart';
 import 'package:my_store/screens/welcome_screen.dart';
 import 'package:my_store/widgets/app_window.dart' as app_window;
 import 'package:my_store/widgets/count_min_prices_dialog.dart';
 import 'package:my_store/widgets/list_header.dart';
 import 'package:my_store/widgets/text_field_my_store.dart';
-import 'package:my_store/widgets/whole_list.dart';
+import 'package:my_store/widgets/whole_list_of_items.dart';
 import 'package:my_store/widgets/window_buttons.dart';
 import 'package:mysql1/mysql1.dart' as mysql;
+import 'package:mysql1/mysql1.dart';
 
 class Products_Page extends StatefulWidget {
   Products_Page({Key key, this.productsList, this.filePath}) : super(key: key);
@@ -37,8 +40,27 @@ class _Products_PageState extends State<Products_Page> {
   static bool loaded;
   ScrollController _controller = ScrollController();
   Product product = new Product();
-  bool atAuctionValue = false;
-  bool soldValue = false;
+  MySqlConnection connection;
+  String checkboxesTableName;
+
+  String getTableName() {
+    if (items.elementAt(0).shipmentDate.contains('/')) {
+      checkboxesTableName = items
+              .elementAt(0)
+              .shipmentDate
+              .substring(0, 10)
+              .replaceAll('/', '_') +
+          '_ch';
+    } else {
+      checkboxesTableName = items
+              .elementAt(0)
+              .shipmentDate
+              .substring(0, 10)
+              .replaceAll('-', '_') +
+          '_ch';
+    }
+    return checkboxesTableName;
+  }
 
   @override
   void initState() {
@@ -54,8 +76,10 @@ class _Products_PageState extends State<Products_Page> {
 
     super.initState();
     ProductsListBrain.createDBPricesTable();
+    checkboxesTableName = getTableName();
     _readPricesData();
-    _loadExcelDataToDb();
+    _readCheckboxData();
+    _loadDataToDb();
   }
 
   _checkIfDataAreLoaded() async {
@@ -74,7 +98,7 @@ class _Products_PageState extends State<Products_Page> {
     });
   }
 
-  _loadExcelDataToDb() async {
+  _loadDataToDb() async {
     print("ścieżka przy tworzeniu tabeli excel:");
     print(widget.filePath);
     items = [];
@@ -93,7 +117,7 @@ class _Products_PageState extends State<Products_Page> {
   _readPricesData() async {
     if (items.isNotEmpty) {
       print(items.elementAt(0).shipmentDate);
-      var result = await MySql.readFromPricesTable(
+      var result = await PricesTable.readFromPricesTable(
           items.elementAt(0).shipmentDate, await WelcomeScreen.connection);
       print(result.toString());
       //mounted prevents memory leak here
@@ -106,6 +130,30 @@ class _Products_PageState extends State<Products_Page> {
             margin = row[2].toString();
           }
         });
+      }
+    }
+  }
+
+  _readCheckboxData() async {
+    if (items.isNotEmpty) {
+      for (Product item in items) {
+        var result = await CheckBoxTable.readFromCheckBoxes(
+            checkboxesTableName, item.LPN, connection);
+        //mounted prevents memory leak here
+        if (result != null && mounted) {
+          for (var row in result) {
+            if (row[0] == 1) {
+              item.at_the_auction = true;
+            } else {
+              item.at_the_auction = false;
+            }
+            if (row[1] == 1) {
+              item.sold = true;
+            } else {
+              item.sold = false;
+            }
+          }
+        }
       }
     }
   }
@@ -198,7 +246,7 @@ class _Products_PageState extends State<Products_Page> {
                           mysql.MySqlConnection connection =
                               await MySql.dBconnection();
 
-                          MySql.insertDataToPrices(
+                          PricesTable.insertDataToPrices(
                               connection,
                               euroRate,
                               newRetail,
@@ -244,22 +292,8 @@ class _Products_PageState extends State<Products_Page> {
                       newRetail: newRetail,
                       margin: margin,
                       items: items,
-                      at_the_auction_check_box: Checkbox(
-                        onChanged: (bool value) {
-                          setState(() {
-                            atAuctionValue = value;
-                          });
-                        },
-                        value: atAuctionValue,
-                      ),
-                      sold_check_box: Checkbox(
-                        onChanged: (bool value) {
-                          setState(() {
-                            soldValue = value;
-                          });
-                        },
-                        value: soldValue,
-                      ),
+                      connection: connection,
+                      checkboxesTableName: checkboxesTableName,
                     ),
                   ),
                 ],
