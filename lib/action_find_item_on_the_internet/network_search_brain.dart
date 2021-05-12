@@ -24,12 +24,12 @@ class NetworkSearchBrain {
   }
 
   static checkResponseAmazon(String ASIN, BuildContext context) async {
-    List<String> countryCode = ['co.uk', 'it', 'de', 'fr', 'es', 'pl'];
+    List<String> countryCode = ['pl', 'co.uk', 'it', 'de', 'fr', 'es', 'com'];
 
     bool success;
     for (String code in countryCode) {
       String url = 'https://amazon.$code/dp/$ASIN';
-      final response = await http.get(url);
+      final response = await http.get(Uri.parse(url));
       int responseCode = response.statusCode;
       if (responseCode == 200) {
         launchURL(url);
@@ -46,7 +46,6 @@ class NetworkSearchBrain {
       showDialog(
         context: context,
         builder: (BuildContext context) => PopUpDialog(
-          context: context,
           message: 'Tego produktu nie ma już w sprzedaży w sklepie Amazon',
           advice: 'Poszukaj w Google',
         ),

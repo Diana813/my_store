@@ -1,23 +1,25 @@
-import 'package:file_selector/file_selector.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:file_selector_platform_interface/file_selector_platform_interface.dart';
+
+import 'package:filepicker_windows/filepicker_windows.dart';
 
 class FilePickerBrain {
-  static Future<XFile> openTextFile(BuildContext context) async {
-    final XTypeGroup typeGroup = XTypeGroup(
-      label: 'Excel files',
-      extensions: ['xlsx', 'csv'],
-    );
-    return await FileSelectorPlatform.instance
-        .openFile(acceptedTypeGroups: [typeGroup]);
+  static openText() {
+    final file = OpenFilePicker()
+      ..filterSpecification = {
+        'Excel file (*.xlsx; *.csv)': '*.xlsx;*.csv',
+      };
+    final result = file.getFile();
+    if (result != null) {
+      return result.path;
+    }
   }
 
-  static Future<List<XFile>> openImageFile(BuildContext context) async {
-    final XTypeGroup typeGroup = XTypeGroup(
-      label: 'Image files',
-      extensions: ['jpg', 'png'],
-    );
-    return await FileSelectorPlatform.instance
-        .openFiles(acceptedTypeGroups: [typeGroup]);
+  static openImageFile() {
+    final file = OpenFilePicker()
+      ..filterSpecification = {'Image files (*.jpg; *.png)': '*.jpg; *.png'};
+
+    final result = file.getFile();
+    if (result != null) {
+      return result.path;
+    }
   }
 }

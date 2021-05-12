@@ -9,6 +9,8 @@ class TextFieldMyStore extends StatelessWidget {
   final Function onSubmited;
   final TextEditingController textEditingController;
   final String counterText;
+  final Function clearSearchResult;
+  final String initialValue;
 
   TextFieldMyStore(
       {this.onChange,
@@ -17,19 +19,25 @@ class TextFieldMyStore extends StatelessWidget {
       this.leadingIcon,
       this.onSubmited,
       this.textEditingController,
-      this.counterText});
+      this.counterText,
+      this.clearSearchResult,
+      this.initialValue});
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
+      initialValue: initialValue,
       onChanged: onChange,
-      onSubmitted: onSubmited,
       controller: textEditingController,
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           labelText: label,
           hintText: hint,
           prefixIcon: leadingIcon,
+          suffixIcon: IconButton(
+            onPressed: clearSearchResult,
+            icon: Icon(Icons.clear),
+          ),
           counterText: counterText,
           border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(25.0)))),

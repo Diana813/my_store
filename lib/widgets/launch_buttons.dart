@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_store/utlis/colors.dart';
 
 class LaunchUrl extends StatelessWidget {
   final Function launchURLAmazon;
@@ -17,49 +18,76 @@ class LaunchUrl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: GridView.count(
-        shrinkWrap: true,
-        crossAxisCount: 5,
-        padding: const EdgeInsets.symmetric(horizontal:250),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: RaisedButton(
-              onPressed: launchURLAmazon,
-              child: Image.asset('assets/images/amazon_logo.png'),
+    return GridView.count(
+      shrinkWrap: true,
+      crossAxisCount: 10,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: ElevatedButton(
+            onPressed: launchURLAmazon,
+            child: Image.asset('assets/images/amazon_logo.png'),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(
+                Color(
+                    ColorsMyStore.AccentColor), // Use the component's default.
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: RaisedButton(
-              onPressed: launchURLCeneo,
-              child: Image.asset('assets/images/ceneo_logo.png'),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: ElevatedButton(
+            onPressed: launchURLCeneo,
+            child: Image.asset('assets/images/ceneo_logo.png'),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(
+                Color(
+                    ColorsMyStore.AccentColor), // Use the component's default.
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: RaisedButton(
-              onPressed: launchURLGoogle,
-              child: Image.asset('assets/images/google_logo.png'),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: ElevatedButton(
+            onPressed: launchURLGoogle,
+            child: Image.asset('assets/images/google_logo.png'),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(
+                Color(
+                    ColorsMyStore.AccentColor), // Use the component's default.
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: RaisedButton(
-              onPressed: launchURLAllegro,
-              child: Image.asset('assets/images/allegro_logo.png'),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: ElevatedButton(
+            onPressed: launchURLAllegro,
+            child: Image.asset('assets/images/allegro_logo.png'),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(
+                Color(
+                    ColorsMyStore.AccentColor), // Use the component's default.
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: RaisedButton(
-              onPressed: launchURLYouTube,
-              child: Image.asset('assets/images/you_tube.png'),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: ElevatedButton(
+            onPressed: launchURLYouTube,
+            child: Image.asset('assets/images/you_tube.png'),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(
+                Color(
+                    ColorsMyStore.AccentColor), // Use the component's default.
+              ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

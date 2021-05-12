@@ -7,6 +7,7 @@ class Product {
   final String name;
   final String totalRetail;
   final String LPN;
+  final String imageUrl;
 
   Product(
       {this.at_the_auction = false,
@@ -16,6 +17,6 @@ class Product {
       this.EAN,
       this.name,
       this.totalRetail,
-      this.LPN});
-
+      this.LPN,
+      this.imageUrl});
 }

@@ -1,48 +1,50 @@
 import 'dart:async';
 
 import 'package:appbar_textfield/appbar_textfield.dart';
-import 'package:file_selector_platform_interface/file_selector_platform_interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:my_store/action_display_list_of_items/brain/products_list_brain.dart';
 import 'package:my_store/action_display_list_of_items/models/product_model.dart';
+import 'package:my_store/action_mysql/items_table.dart';
 import 'package:my_store/action_mysql/mySql.dart';
 import 'package:my_store/action_open_file/brain/file_picker_brain.dart';
 import 'package:my_store/action_open_file/brain/read_file.dart';
 import 'package:my_store/action_open_file/brain/welcome_screen_brain.dart';
-import 'package:my_store/action_post/allegro_api/authentication.dart';
 import 'package:my_store/utlis/colors.dart';
+import 'package:my_store/widgets/popup_files_list.dart';
 import 'package:my_store/widgets/raised_button_my_store.dart';
 import 'package:mysql1/mysql1.dart' as mysql;
 
 class WelcomeScreen extends StatefulWidget {
+  WelcomeScreen({Key key, this.tableName}) : super(key: key);
+  String filePath;
+  String tableName;
+
   @override
   _WelcomeScreenState createState() => _WelcomeScreenState();
-  static Future<mysql.MySqlConnection> connection = MySql.dBconnection();
+  static Future<mysql.MySqlConnection> connection;
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  String filePath;
   var items = <Product>[];
   List<String> files = [];
   bool _loading;
   bool thereAreItemsInTheList;
-  static var currentDocumentLoaded = null;
+  bool listOfFilestIsNotEmpty;
 
   @override
   void initState() {
-    filePath = '';
+    MySql.dBconnection();
     _loading = false;
     _setFiles();
-    //AuthenticateClient authenticateClient = new AuthenticateClient();
-    //authenticateClient.createClient();
 
     super.initState();
   }
 
   _setFiles() async {
     files = [];
-    files = await WelcomeScreenBrain.getFiles(files);
+    files = await WelcomeScreenBrain.getFiles();
   }
 
   Future<void> createComputeFunction(String filePath) async {
@@ -53,12 +55,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     if (items == null) {
       WelcomeScreenBrain.showAlertIfFileIsWrong(context);
     } else {
-      bool result =
-          await WelcomeScreenBrain.goToProductsList(items, context, filePath);
+      bool result = await WelcomeScreenBrain.goToProductsList(
+          items, context, filePath, ProductsListBrain.getItemsTableName(items));
       setState(() {
-        currentDocumentLoaded = result;
-        print('Result from product list (if current doc loaded)');
-        print(currentDocumentLoaded);
         if (result != false) {
           _setFiles();
           thereAreItemsInTheList = true;
@@ -73,33 +72,64 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   _getFilePathFromPicker() async {
-    XFile file = await FilePickerBrain.openTextFile(context);
+    String filePath = await FilePickerBrain.openText();
+    if (filePath == null) {
+      return;
+    }
     setState(() {
-      filePath = file.path;
-      print("Ścieżka do pliku: " + filePath);
+      widget.filePath = filePath;
       _loading = true;
     });
-    if (filePath != '') {
-      createComputeFunction(filePath);
+    if (widget.filePath != '') {
+      createComputeFunction(widget.filePath);
     }
   }
 
   _checkIfFileListItemsIsEmpty() {
-    bool withItems;
-    if (files.isNotEmpty) {
-      withItems = true;
+    if (files != null && files.isNotEmpty) {
+      listOfFilestIsNotEmpty = true;
     } else {
-      withItems = false;
+      listOfFilestIsNotEmpty = false;
     }
     setState(() {
-      thereAreItemsInTheList = withItems;
-      print('Set state on welcome_screen: ');
-      print(thereAreItemsInTheList);
+      thereAreItemsInTheList = listOfFilestIsNotEmpty;
     });
   }
 
-  bool _checkIfCurrentDocIsLoaded() {
-    return currentDocumentLoaded;
+  _openFilesList(BuildContext context, List<String> files,
+      bool thereAreItemsInTheList, List<Product> items, String filePath) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => PopUpDialogList(
+        context: context,
+        message: 'Wybierz plik z listy',
+        filesList: files,
+        listIsNotEmpty: thereAreItemsInTheList,
+        listWidget: ListView.builder(
+          shrinkWrap: true,
+          itemCount: files.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              leading: Icon(
+                Icons.done,
+                color: MaterialColor(
+                    ColorsMyStore.AccentColor, ColorsMyStore.color),
+              ),
+              title: Text(files.elementAt(index)),
+              onTap: () async {
+                widget.tableName = files.elementAt(index);
+                widget.filePath = null;
+                items =
+                    await ItemsTable.readItemsDataFromDBTable(widget.tableName);
+                Navigator.pop(context);
+                WelcomeScreenBrain.goToProductsList(
+                    items, context, filePath, files.elementAt(index));
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -110,13 +140,27 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           IconButton(
             icon: Icon(Icons.chevron_right),
             onPressed: () async {
+              if (widget.filePath != null) {
+                items = await compute(computeFunction, widget.filePath);
+                print(widget.filePath);
+                print(items.length);
+              } else if (widget.tableName != null) {
+                items =
+                    await ItemsTable.readItemsDataFromDBTable(widget.tableName);
+                print(widget.tableName);
+                print(items.length);
+              } else {
+                items == null;
+              }
               if (items != null) {
+                print(items.length);
+                String tableName = ProductsListBrain.getItemsTableName(items);
+                /* if (tableName == null) {
+                  return;
+                }*/
                 bool result = await WelcomeScreenBrain.goToProductsList(
-                    items, context, 'a');
+                    items, context, widget.filePath, tableName);
                 setState(() {
-                  currentDocumentLoaded = result;
-                  print('Result from product list (if current doc loaded');
-                  print(currentDocumentLoaded);
                   if (result != false) {
                     _setFiles();
                     thereAreItemsInTheList = true;
@@ -137,20 +181,20 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ),
         onSubmitted: (value) async {
           setState(() {
-            if (!value.contains('xlsx') && !value.contains('xls') && !value.contains('csv')) {
+            if (!value.contains('xlsx') && !value.contains('csv')) {
               WelcomeScreenBrain.showAlertIfFileIsWrong(context);
               _loading = false;
             } else if (value.startsWith('"')) {
-              filePath = value.replaceAll("\"", "");
+              widget.filePath = value.replaceAll("\"", "");
               _loading = true;
             } else {
-              filePath = value;
+              widget.filePath = value;
               _loading = true;
             }
-            print("Ścieżka do pliku: " + filePath);
+            print("Ścieżka do pliku: " + widget.filePath);
           });
-          if (filePath != '') {
-            createComputeFunction(filePath);
+          if (widget.filePath != null) {
+            createComputeFunction(widget.filePath);
           }
         },
         title: Text('My Store'),
@@ -191,16 +235,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   paddingVertical: 20,
                   onClick: () {
                     _checkIfFileListItemsIsEmpty();
-                    currentDocumentLoaded = _checkIfCurrentDocIsLoaded();
-                    print('currentdocLoaded:');
-                    print(currentDocumentLoaded);
-                    WelcomeScreenBrain.openFilesList(
-                        context,
-                        files,
-                        thereAreItemsInTheList,
-                        items,
-                        filePath,
-                        currentDocumentLoaded);
+                    if (listOfFilestIsNotEmpty == false) {
+                      _setFiles();
+                      listOfFilestIsNotEmpty = true;
+                    }
+                    _openFilesList(context, files, thereAreItemsInTheList,
+                        items, widget.filePath);
                   },
                   childWidget: Text(
                     'Wybierz plik',

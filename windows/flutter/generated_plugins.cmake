@@ -3,8 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  bitsdojo_window
-  file_selector_windows
+  bitsdojo_window_windows
   url_launcher_windows
 )
 

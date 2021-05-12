@@ -20,7 +20,7 @@ class ListHeaderMyStore extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Visibility(
               visible: false,
               child: Padding(
@@ -38,7 +38,7 @@ class ListHeaderMyStore extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Visibility(
               visible: false,
               child: Padding(
@@ -56,7 +56,7 @@ class ListHeaderMyStore extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 4,
+            flex: 3,
             child: Container(
               margin: EdgeInsets.all(10),
               child: Text(
@@ -66,7 +66,7 @@ class ListHeaderMyStore extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 2,
             child: Container(
               margin: EdgeInsets.all(10),
               child: Text(
@@ -76,7 +76,7 @@ class ListHeaderMyStore extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 2,
             child: Container(
               margin: EdgeInsets.all(10),
               child: Text(
@@ -86,7 +86,7 @@ class ListHeaderMyStore extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Container(
               margin: EdgeInsets.all(10),
               child: Text(
@@ -96,7 +96,7 @@ class ListHeaderMyStore extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Container(
               margin: EdgeInsets.all(10),
               child: Text(
@@ -106,7 +106,7 @@ class ListHeaderMyStore extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 1,
             child: Container(
               margin: EdgeInsets.all(10),
               child: Text(

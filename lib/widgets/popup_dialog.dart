@@ -1,39 +1,48 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_store/utlis/colors.dart';
 
 class PopUpDialog extends StatelessWidget {
-  final BuildContext context;
   final String message;
   final String advice;
-  final Widget flatButton;
+  final String textButton;
+  final Function onPressedContinue;
 
   PopUpDialog(
-      {@required this.context,
-      @required this.message,
-      @required this.advice,
-      this.flatButton});
+      {@required this.message,
+      this.advice,
+      this.textButton,
+      this.onPressedContinue});
 
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
       title: Text(message),
-      content: new Column(
+      content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(advice),
+          Text(advice == null ? '' : advice),
         ],
       ),
       actions: <Widget>[
-        flatButton,
-        new FlatButton(
+        TextButton(
+          onPressed: onPressedContinue,
+          child: Text(
+            textButton == null ? '' : textButton,
+            style: TextStyle(color: Color(ColorsMyStore.PrimaryColor)),
+          ),
+        ),
+        TextButton(
           onPressed: () {
             Navigator.of(context).pop();
           },
-          textColor: Theme.of(context).primaryColor,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: const Text('OK'),
+            child: const Text(
+              'OK',
+              style: TextStyle(color: Color(ColorsMyStore.PrimaryColor)),
+            ),
           ),
         ),
       ],

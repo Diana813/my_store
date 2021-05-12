@@ -2,12 +2,11 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:my_store/screens/welcome_screen.dart';
 import 'package:my_store/utlis/colors.dart';
+import 'package:my_store/utlis/navigation.dart';
 import 'package:my_store/widgets/app_window.dart' as app_window;
 import 'package:my_store/widgets/window_buttons.dart';
-
-import 'action_display_list_of_items/brain/products_list_brain.dart';
-import 'screens/welcome_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -42,9 +41,12 @@ void configLoading() {
 }
 
 class MyApp extends StatelessWidget {
+  MyApp({Key key, this.tableName}) : super(key: key);
+  String tableName;
+
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'My Store',
       theme: new ThemeData(
@@ -61,10 +63,12 @@ class MyApp extends StatelessWidget {
           color: Colors.black87,
           width: 1,
           child: app_window.AppWindow(
-            WelcomeScreen(),
+            WelcomeScreen(
+              tableName: tableName,
+            ),
             WindowButtons(
               closeButtonOnPressed: () async {
-                await ProductsListBrain.closeApp();
+                await NavigationMyStore.closeApp();
               },
             ),
           ),

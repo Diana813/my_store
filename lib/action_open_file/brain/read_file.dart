@@ -6,7 +6,7 @@ import 'package:excel/excel.dart';
 import 'package:my_store/action_display_list_of_items/models/product_model.dart';
 
 class ReadFile {
-  static List<Product> excelData = [];
+  static List<Product> fileData = [];
   static var bytes;
   static var excel;
   static var imageFile;
@@ -14,12 +14,12 @@ class ReadFile {
   static Future<List<Product>> readFile(var file) async {
     //jeśli to excel
     if (file.toString().contains('xlsx')) {
-      excelData = <Product>[];
+      fileData = <Product>[];
       bytes = File(file).readAsBytesSync();
       excel = Excel.decodeBytes(bytes);
 
       for (var table in excel.tables.keys) {
-        print(table); //sheet Name
+        print('dane tabeli excel(liczba kolumn, liczba wierszy):');
         print(excel.tables[table].maxCols);
         print(excel.tables[table].maxRows);
 
@@ -34,7 +34,7 @@ class ReadFile {
                   .value
                   .toString() !=
               "EAN") {
-            excelData = null;
+            fileData = null;
             break;
           }
 
@@ -59,15 +59,17 @@ class ReadFile {
                   .cell(CellIndex.indexByString("AM$i"))
                   .value
                   .toString());
-          excelData.add(product);
+          fileData.add(product);
         }
       }
+      return fileData;
       //jeśli to csv
     } else {
       final input = new File(file).openRead();
       final fields = await input
           .transform(utf8.decoder)
-          .transform(new CsvToListConverter(shouldParseNumbers: false))
+          .transform(new CsvToListConverter(
+              shouldParseNumbers: false, allowInvalid: true))
           .toList();
       List<dynamic> categoryList = fields.elementAt(0);
       int ASIN;
@@ -76,23 +78,23 @@ class ReadFile {
       int totalRetail;
       int LPN;
       int shipment;
-      for(String element in categoryList){
-        if(element.contains('ShipmentClosed')){
+      for (String element in categoryList) {
+        if (element.contains('ShipmentClosed')) {
           shipment = categoryList.indexOf(element);
         }
-        if(element.contains('ASIN')){
+        if (element.contains('ASIN')) {
           ASIN = categoryList.indexOf(element);
         }
-        if(element.contains('EAN')){
+        if (element.contains('EAN')) {
           EAN = categoryList.indexOf(element);
         }
-        if(element.contains('Item Desc')){
+        if (element.contains('Item Desc')) {
           name = categoryList.indexOf(element);
         }
-        if(element.contains('TOTAL RETAIL')){
+        if (element.contains('TOTAL RETAIL')) {
           totalRetail = categoryList.indexOf(element);
         }
-        if(element.contains('LPN')){
+        if (element.contains('LPN')) {
           LPN = categoryList.indexOf(element);
         }
       }
@@ -108,11 +110,10 @@ class ReadFile {
             name: categoryList.elementAt(name),
             totalRetail: categoryList.elementAt(totalRetail),
             LPN: categoryList.elementAt(LPN));
-        excelData.add(product);
+        fileData.add(product);
       }
 
-      return excelData;
+      return fileData;
     }
   }
-
 }

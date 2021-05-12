@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_store/utlis/colors.dart';
 
 class PopUpDialogList extends StatelessWidget {
   final BuildContext context;
@@ -36,14 +37,17 @@ class PopUpDialogList extends StatelessWidget {
         ],
       ),
       actions: <Widget>[
-        new FlatButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          textColor: Theme.of(context).primaryColor,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: const Text('OK'),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.white)),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: const Text('OK', style: TextStyle(color: Color(ColorsMyStore.PrimaryColor))),
+            ),
           ),
         ),
       ],

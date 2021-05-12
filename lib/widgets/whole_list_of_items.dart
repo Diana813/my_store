@@ -1,13 +1,17 @@
+import 'package:clipboard/clipboard.dart';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:my_store/action_display_list_of_items/brain/display_list.dart';
 import 'package:my_store/action_display_list_of_items/brain/products_list_brain.dart';
 import 'package:my_store/action_display_list_of_items/models/product_model.dart';
 import 'package:my_store/action_find_item_on_the_internet/network_search_brain.dart';
-import 'package:my_store/action_mysql/checkbox_table.dart';
+import 'package:my_store/action_go_to_another_screen/display_popup.dart';
+import 'package:my_store/action_mysql/items_table.dart';
+import 'package:my_store/action_post/allegro_api/networking.dart';
+import 'package:my_store/utlis/navigation.dart';
 import 'package:my_store/widgets/list_item.dart';
-import 'package:mysql1/mysql1.dart';
 
 class WholeList extends StatefulWidget {
   final ScrollController controller;
@@ -15,8 +19,11 @@ class WholeList extends StatefulWidget {
   final String euroRate;
   final String newRetail;
   final String margin;
-  final MySqlConnection connection;
-  final String checkboxesTableName;
+  final String tableName;
+  final Function searchForPastedText;
+  String textFieldInitialValue;
+  final TextEditingController field;
+  final Function setDownloadingValues;
 
   WholeList(
       {@required this.controller,
@@ -24,17 +31,32 @@ class WholeList extends StatefulWidget {
       @required this.euroRate,
       @required this.newRetail,
       @required this.margin,
-      @required this.connection,
-      @required this.checkboxesTableName});
+      @required this.tableName,
+      @required this.textFieldInitialValue,
+      @required this.field,
+      @required this.searchForPastedText,
+      @required this.setDownloadingValues});
 
   @override
   _WholeListState createState() => _WholeListState();
 }
 
 class _WholeListState extends State<WholeList> {
-  bool auctionChange = false;
+  copyText(String newText) {
+    FlutterClipboard.copy(newText).then((value) => () {});
+  }
 
-  bool soldChange = false;
+  paste() {
+    FlutterClipboard.paste().then((value) {
+      setState(() {
+        widget.field.text = value;
+        widget.textFieldInitialValue = value;
+        widget.searchForPastedText(value);
+      });
+    });
+  }
+
+  NetworkHelper networkHelper = new NetworkHelper();
 
   @override
   Widget build(context) {
@@ -58,12 +80,16 @@ class _WholeListState extends State<WholeList> {
         itemExtent: 250,
         itemBuilder: (contex, index) {
           EasyLoading.dismiss();
+          if (widget.items.isEmpty) {
+            DisplayList.displayMessageNoConnection(
+                context, 'Nie udało się wczytać daych');
+          }
           return Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
             child: ListItemMyStore(
               EAN: widget.items.elementAt(index).EAN == null
                   ? ''
-                  : widget.items.elementAt(index).EAN,
+                  : widget.items.elementAt(index).EAN.toString().split('.')[0],
               name: widget.items.elementAt(index).name == null
                   ? ''
                   : widget.items.elementAt(index).name,
@@ -79,8 +105,24 @@ class _WholeListState extends State<WholeList> {
                   ? ''
                   : widget.items.elementAt(index).LPN,
               onTap: () async {
-                await ProductsListBrain.goToAllegroScreen(
-                    widget.items, context, index);
+                if (DisplayPopUp.savingItemsToDb == false &&
+                    DisplayPopUp.downloadingImages == false) {
+                  await NavigationMyStore.navigationForwardToAllegroScreen(
+                      widget.items, context, index);
+                } else {
+                  DisplayPopUp.displayPopup(context, widget.tableName,
+                      () async {
+                    setState(() {
+                      DisplayPopUp.stopDownloadingImages = true;
+                    });
+                    await DisplayPopUp.gotoAnotherScreen(
+                        widget.tableName,
+                        context,
+                        await NavigationMyStore
+                            .navigationForwardToAllegroScreen(
+                                widget.items, context, index));
+                  });
+                }
               },
               launchURLAmazon: () {
                 EasyLoading.show();
@@ -97,7 +139,7 @@ class _WholeListState extends State<WholeList> {
               launchURLGoogle: () {
                 String name = widget.items.elementAt(index).name;
                 NetworkSearchBrain.launchURL(
-                    'https://google.com/search?q=Ceneo Amazon $name');
+                    'https://google.com/search?q=$name');
               },
               launchURLAllegro: () {
                 String name = widget.items.elementAt(index).name;
@@ -112,15 +154,12 @@ class _WholeListState extends State<WholeList> {
                 NetworkSearchBrain.launchURL(
                     'https://www.youtube.com/results?search_query=$finalName');
               },
-              sold_on_change: (value) {
+              sold_on_change: (value) async {
                 setState(() {
                   widget.items.elementAt(index).sold = value;
                 });
-                CheckBoxTable.insertDataToCheckBoxesSold(
-                    widget.connection,
-                    widget.checkboxesTableName,
-                    widget.items.elementAt(index).LPN,
-                    value);
+                ItemsTable.insertDataToCheckBoxesSold(
+                    widget.tableName, widget.items.elementAt(index).LPN, value);
               },
               sold_value: widget.items.elementAt(index).sold,
               at_the_auction_value:
@@ -129,12 +168,39 @@ class _WholeListState extends State<WholeList> {
                 setState(() {
                   widget.items.elementAt(index).at_the_auction = value;
                 });
-                CheckBoxTable.insertDataToCheckBoxesAtAuction(
-                    widget.connection,
-                    widget.checkboxesTableName,
-                    widget.items.elementAt(index).LPN,
-                    value);
+                ItemsTable.insertDataToCheckBoxesAtAuction(
+                    widget.tableName, widget.items.elementAt(index).LPN, value);
               },
+              selectAndCopyTextName: () {
+                setState(() {
+                  copyText(widget.items.elementAt(index).name);
+                });
+              },
+              selectAndCopyTextEAN: () {
+                setState(() {
+                  copyText(widget.items
+                      .elementAt(index)
+                      .EAN
+                      .toString()
+                      .split('.')[0]);
+                });
+              },
+              selectAndCopyTextLPN: () {
+                setState(() {
+                  copyText(widget.items.elementAt(index).LPN);
+                });
+              },
+              selectAndCopyTextMinRetail: () {
+                setState(() {
+                  copyText(widget.newRetail);
+                });
+              },
+              selectAndCopyTextTotalRetail: () {
+                setState(() {
+                  copyText(widget.items.elementAt(index).totalRetail);
+                });
+              },
+              imageUrl: widget.items.elementAt(index).imageUrl,
             ),
           );
         },
