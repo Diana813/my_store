@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:my_store/action_go_to_another_screen/display_popup.dart';
-import 'package:my_store/utlis/colors.dart';
+import 'package:my_store/utils/colors.dart';
 
 class ProgressIndicatorMyStore extends StatelessWidget {
   const ProgressIndicatorMyStore({

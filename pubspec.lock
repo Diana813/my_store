@@ -197,6 +197,31 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.1.0"
+  file_chooser:
+    dependency: transitive
+    description:
+      path: "plugins/file_chooser"
+      ref: "8ea9f1ce79f04e44bd6392f4155a014b0a7eb6e8"
+      resolved-ref: "8ea9f1ce79f04e44bd6392f4155a014b0a7eb6e8"
+      url: "git://github.com/google/flutter-desktop-embedding.git"
+    source: git
+    version: "0.2.0"
+  file_picker:
+    dependency: transitive
+    description:
+      name: file_picker
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.7"
+  file_selector:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "58a06b53b785b85f02e10a1473b6ce657913197e"
+      url: "https://github.com/marchdev-tk/file_selector"
+    source: git
+    version: "1.1.0"
   filepicker_windows:
     dependency: "direct main"
     description:
@@ -204,6 +229,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+  flinq:
+    dependency: transitive
+    description:
+      name: flinq
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -242,6 +274,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.2"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.11"
   flutter_spinkit:
     dependency: transitive
     description:
@@ -424,7 +463,7 @@ packages:
     source: hosted
     version: "3.0.0"
   plugin_platform_interface:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: plugin_platform_interface
       url: "https://pub.dartlang.org"

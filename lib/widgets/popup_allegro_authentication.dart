@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:my_store/action_post/allegro_api/authentication.dart';
-import 'package:my_store/utlis/colors.dart';
+import 'package:my_store/action_allegro/allegro_api/authentication.dart';
+import 'package:my_store/utils/colors.dart';
 
 class PopUpAllegroAuth extends StatelessWidget {
   final BuildContext contextValue;

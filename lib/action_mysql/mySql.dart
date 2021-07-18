@@ -21,13 +21,13 @@ class MySql {
     var list;
     try {
       list = await connection.query(
-          "SELECT * FROM information_schema.tables WHERE table_schema = '$db' AND table_name != 'prices' AND table_name NOT LIKE '%_ch%'");
+          "SELECT * FROM information_schema.tables WHERE table_schema = '$db' AND table_name != 'prices' AND table_name != 'My_offers' AND table_name NOT LIKE '%_ch%'");
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
       print('odczytuję dane o tytułach tabel');
       list = await connection.query(
-          "SELECT * FROM information_schema.tables WHERE table_schema = '$db' AND table_name != 'prices' AND table_name NOT LIKE '%_ch%'");
+          "SELECT * FROM information_schema.tables WHERE table_schema = '$db' AND table_name != 'prices' AND table_name != 'My_offers' AND table_name NOT LIKE '%_ch%'");
     }
     return list;
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:my_store/utlis/colors.dart';
+import 'package:my_store/utils/colors.dart';
 
 class ListHeaderMyStore extends StatelessWidget {
   @override

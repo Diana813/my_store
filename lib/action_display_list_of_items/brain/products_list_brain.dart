@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:my_store/action_display_list_of_items/models/product_model.dart';
 import 'package:my_store/action_go_to_another_screen/display_popup.dart';
-import 'package:my_store/utlis/navigation.dart';
+import 'package:my_store/utils/navigation.dart';
 
 class ProductsListBrain {
   static getItemsTableName(List<Product> items) {

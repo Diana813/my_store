@@ -3,62 +3,76 @@ import 'package:carousel_slider/carousel_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:my_store/action_allegro/allegro_api/post/post_offer.dart';
+import 'package:my_store/action_allegro/product/product_model.dart';
+import 'package:my_store/action_create_offer/bindProduct.dart';
+import 'package:my_store/action_create_offer/ofer_param.dart';
+import 'package:my_store/action_create_offer/offer_categories.dart';
+import 'package:my_store/action_create_offer/offer_images.dart';
+import 'package:my_store/action_create_offer/offer_model.dart';
 import 'package:my_store/action_find_item_on_the_internet/network_search_brain.dart';
+import 'package:my_store/action_mysql/my_offers_table.dart';
 import 'package:my_store/action_open_file/brain/file_picker_brain.dart';
-import 'package:my_store/action_post/brain/allegro_form_screen_brain.dart';
-import 'package:my_store/action_post/models/products/parameters/parameter.dart';
-import 'package:my_store/action_post/models/products/product.dart';
+import 'package:my_store/utils/date.dart';
+import 'package:my_store/widgets/allegro_form_widgets/item_details_list.dart';
+import 'package:my_store/widgets/allegro_form_widgets/publishing_widget.dart';
 import 'package:my_store/widgets/app_window.dart' as app_window;
-import 'package:my_store/widgets/item_details_list.dart';
 import 'package:my_store/widgets/launch_buttons.dart';
 import 'package:my_store/widgets/window_buttons.dart';
 
 class AllegroForm extends StatefulWidget {
   AllegroForm({Key key, this.product}) : super(key: key);
   final product;
-  List<String> imagesFiles;
-  List<String> miniImageFiles;
+  final List<String> imagesFiles = [];
 
   @override
   _AllegroFormState createState() => _AllegroFormState();
 }
 
 class _AllegroFormState extends State<AllegroForm> {
-  String _amazonName;
-  String _allegroName;
   String _description;
-  String _category;
-  List<Parameter> _parameters;
-  ProductJson _productJson;
   TextEditingController _nameController;
   TextEditingController _descriptionController;
-  TextEditingController _categoryController;
   final controller = CarouselController();
+  bool addToDbValue = false;
+  bool draftDoneVisibility = false;
+  bool activeOfferDoneVisibility = false;
+  OfferCategories offerCategories = new OfferCategories();
+  BindProduct bindProduct = new BindProduct();
+  OfferModel myOffer = new OfferModel();
+  OfferImages offerImages = new OfferImages();
+  OfferParam offerParam = new OfferParam();
+  ProductModel productModel = new ProductModel();
 
   @override
   void initState() {
     super.initState();
-    _getProduct();
+    getPhotosFromDb();
+    productModel.getProduct(
+        widget.product.EAN.toString().split('.')[0],
+        offerCategories,
+        myOffer,
+        _description,
+        _nameController,
+        widget.product.name,
+        _descriptionController,
+        offerParam,
+        offerImages,
+        widget.imagesFiles,
+        bindProduct,
+        updateProductData);
+    MyOffersTable.addEANToTableMyOffer(
+        widget.product.EAN.toString().split('.')[0], Date.getDate());
+    MyOffersTable.updateDate(
+        widget.product.EAN.toString().split('.')[0], Date.getDate());
+    getCategories(null);
   }
 
-  _getProduct() async {
-    EasyLoading.show();
-    var response =
-        await AllegroBrain.getProductByEan(widget.product.EAN.toString());
-    _category = await AllegroBrain.getCategoryName(response);
-    EasyLoading.dismiss();
-    setState(() {
-      _productJson = response;
-      _allegroName =
-          AllegroBrain.getProductTitle(_productJson, widget.product.name);
-      _description = AllegroBrain.getProductDescription(_productJson);
-      _nameController = TextEditingController(
-          text:
-              AllegroBrain.getProductTitle(_productJson, widget.product.name));
-      _descriptionController = TextEditingController(text: _description);
-      _categoryController = TextEditingController(text: _category);
-      _parameters = AllegroBrain.getParameters(_productJson);
-    });
+  @override
+  void dispose() {
+    if (_nameController != null) this._nameController.dispose();
+    if (_descriptionController != null) this._descriptionController.dispose();
+    super.dispose();
   }
 
   @override
@@ -67,7 +81,7 @@ class _AllegroFormState extends State<AllegroForm> {
       color: Colors.black87,
       width: 1,
       child: app_window.AppWindow(
-          new Scaffold(
+          Scaffold(
             appBar: AppBar(
               title: Text('My Store'),
             ),
@@ -81,63 +95,204 @@ class _AllegroFormState extends State<AllegroForm> {
                       NetworkSearchBrain.checkResponseAmazon(ASIN, context);
                     },
                     launchURLGoogle: () {
-                      String name = widget.product.name;
+                      String name = _nameController.text;
                       NetworkSearchBrain.launchURL(
                           'https://google.com/search?q=$name');
                     },
                     launchURLCeneo: () {
+                      String name = _nameController.text;
                       NetworkSearchBrain.launchURL(
-                          'https://ceneo.pl/;szukaj-$_amazonName');
+                          'https://ceneo.pl/;szukaj-$name');
                     },
                     launchURLAllegro: () {
+                      String name = _nameController.text;
                       NetworkSearchBrain.launchURL(
-                          'https://allegro.pl/listing?string=$_amazonName');
+                          'https://allegro.pl/listing?string=$name');
                     },
                     launchURLYouTube: () {
+                      String name = _nameController.text;
                       NetworkSearchBrain.launchURL(
-                          'https://www.youtube.com/results?search_query=$_amazonName');
+                          'https://www.youtube.com/results?search_query=$name');
                     },
                   ),
                 ),
                 Container(
                   child: ItemDetailsList(
                     onTap: () {
-                      var file = FilePickerBrain.openImageFile();
-                      if (widget.imagesFiles == null) {
-                        widget.imagesFiles = [];
-                      }
-                      widget.imagesFiles.add(file);
+                      var files = FilePickerBrain.openImageFiles();
+                      offerImages.photos = offerImages.addOwnPhotosToTheList(
+                          files, offerImages.photos);
+                      offerImages.photosTitle = offerImages.displayPhotosTitle(
+                          productModel.products,
+                          offerImages.photos,
+                          offerImages.photosFromDb);
                       setState(() {});
                     },
-                    imageFiles: AllegroBrain.getPhotoUrls(
-                                _productJson, widget.imagesFiles) ==
-                            null
-                        ? widget.imagesFiles
-                        : AllegroBrain.getPhotoUrls(
-                            _productJson, widget.imagesFiles),
-                    name: _allegroName == null ? _amazonName : _allegroName,
+                    imageFiles: offerImages.photos,
+                    name: _nameController == null ? '' : _nameController.text,
                     EAN: widget.product.EAN.toString().split('.')[0],
-                    onTapMini: () async {
-                      var file = FilePickerBrain.openImageFile();
-                      if (widget.miniImageFiles == null) {
-                        widget.miniImageFiles = [];
-                      }
-                      widget.miniImageFiles.add(file);
-                      setState(() {});
-                    },
-                    miniImageFiles: widget.miniImageFiles,
                     description: _description == null ? '' : _description,
                     nameController: _nameController,
                     descriptionController: _descriptionController,
                     caruselController: controller,
-                    categoryController: _categoryController,
-                    parameters: _parameters == null ? [] : _parameters,
+                    categoryName: offerCategories.categoryName == null
+                        ? ''
+                        : offerCategories.categoryName,
+                    parameters: offerParam.productParameters == null
+                        ? []
+                        : offerParam.productParameters,
+                    deleteAllPhotos: () async {
+                      await offerImages.deleteListOfPhotos(offerImages.photos,
+                          widget.product.EAN.toString().split('.')[0]);
+                      setState(() {});
+                    },
+                    deletePhoto: (index, context, tapPosition) async {
+                      offerImages.showPopupMenuToDeletePhoto(
+                          context,
+                          tapPosition,
+                          widget.product.EAN.toString().split('.')[0],
+                          productModel,
+                          index,
+                          updateState);
+                    },
+                    photosTitle: offerImages.photosTitle,
+                    chooseCategory:
+                        offerCategories.allowChangingCategory == false
+                            ? null
+                            : (String newValue) {
+                                offerCategories.updateCategories(
+                                    newValue,
+                                    getCategories,
+                                    bindProduct,
+                                    myOffer,
+                                    updateState);
+                              },
+                    categoryDropDownValue:
+                        offerCategories.categoryDropDownValue,
+                    categories: offerCategories.displayCategories(),
+                    canCreateProduct: bindProduct.canCreateProduct,
+                    canBindWithProduct: bindProduct.canBindWithProduct,
+                    resetCategory: () {
+                      offerCategories.categoryName = '';
+                      offerCategories.allowChangingCategory = true;
+                      bindProduct.checkBoxBindingInfoVisible = false;
+                      bindProduct.checkBoxBindProductVisible = false;
+                      getCategories(null);
+                    },
+                    addProductQuestion: bindProduct.productQuestion,
+                    onBindWithProductChange: (bool value) {
+                      setState(() {
+                        bindProduct.bindWithProduct = value;
+                        bindProduct.setProductId(
+                            productModel.products, myOffer);
+                      });
+                    },
+                    bindWithProduct: bindProduct.bindWithProduct,
+                    bindingVisible: bindProduct.checkBoxBindProductVisible,
+                    bindingInfoVisible: bindProduct.checkBoxBindingInfoVisible,
+                    warning:
+                        offerImages.imageListLimitWarning(offerImages.photos),
+                    shouldWarn: offerImages.shouldWarn,
+                    offer: myOffer,
+                    getParameters: () async {
+                      await offerParam.getParameters(myOffer, updateState);
+                    },
+                    displayRequiredParams:
+                        offerParam.displayParams(offerParam.requiredParams),
+                    displayRequiredForProductParams: offerParam
+                        .displayParams(offerParam.requiredForProductParams),
+                    displayOtherParams:
+                        offerParam.displayParams(offerParam.otherParams),
                   ),
-                )
+                ),
+                CheckboxListTile(
+                  value: addToDbValue,
+                  onChanged: (value) async {
+                    if (offerImages.photosFromDb.isNotEmpty) {
+                      await MyOffersTable.deletePhotoURLs(
+                          widget.product.EAN.toString().split('.')[0]);
+                    }
+                    await offerImages.addPhotosToDb(offerImages.photos,
+                        widget.product.EAN.toString().split('.')[0]);
+                    setState(() {
+                      addToDbValue = value;
+                    });
+                  },
+                  title: Text('To jest wzorcowa oferta dla tego produktu'),
+                ),
+                PublishingPart(
+                  draftDoneVisibility: draftDoneVisibility,
+                  publishDraft: () async {
+                    setMyOffer();
+                    int statusCode = await PostOffer.createDraft(
+                        myOffer,
+                        offerCategories.getProductCategory(
+                            myOffer.productCategory, myOffer.category));
+                    if (statusCode == 200) {
+                      setState(() {
+                        draftDoneVisibility = true;
+                      });
+                      await Future.delayed(Duration(seconds: 1));
+                      setState(() {
+                        draftDoneVisibility = false;
+                      });
+                    }
+                  },
+                  activeOfferDoneVisibility: activeOfferDoneVisibility,
+                  publishOffer: () async {
+                    setMyOffer();
+                    int statusCode = await PostOffer.createDraft(
+                        myOffer,
+                        offerCategories.getProductCategory(
+                            myOffer.productCategory, myOffer.category));
+                    if (statusCode == 200) {
+                      setState(() {
+                        activeOfferDoneVisibility = true;
+                      });
+                      await Future.delayed(Duration(seconds: 1));
+                      setState(() {
+                        activeOfferDoneVisibility = false;
+                      });
+                    }
+                  },
+                ),
               ],
             ),
           ),
           WindowButtons()),
     );
+  }
+
+  getPhotosFromDb() async {
+    offerImages.photosFromDb = await OfferImages.getPhotosFromDb(
+        widget.product.EAN.toString().split('.')[0]);
+  }
+
+  getCategories(String parentId) async {
+    offerCategories.categories = await offerCategories.getCategories(parentId);
+    setState(() {
+      offerCategories.categoryDropDownValue =
+          offerCategories.categories.first.name;
+    });
+  }
+
+  updateState() {
+    setState(() {});
+  }
+
+  updateProductData() {
+    setState(() {
+      _description = productModel.getDescription();
+      _nameController = productModel.getNameController(widget.product.name);
+      _descriptionController =
+          productModel.getDescriptionController(_description);
+      productModel.setProductData(offerCategories, offerParam, offerImages,
+          widget.imagesFiles, bindProduct);
+    });
+  }
+
+  setMyOffer() {
+    myOffer.title = _nameController.text;
+    myOffer.images = offerImages.setMyOfferImages(offerImages.photos);
   }
 }

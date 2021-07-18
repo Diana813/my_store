@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:my_store/screens/welcome_screen.dart';
-import 'package:my_store/utlis/colors.dart';
-import 'package:my_store/utlis/navigation.dart';
+import 'package:my_store/utils/colors.dart';
+import 'package:my_store/utils/navigation.dart';
 import 'package:my_store/widgets/app_window.dart' as app_window;
 import 'package:my_store/widgets/window_buttons.dart';
 

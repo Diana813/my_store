@@ -1,6 +1,6 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:my_store/utlis/colors.dart';
+import 'package:my_store/utils/colors.dart';
 
 class WindowButtons extends StatelessWidget {
   final Function closeButtonOnPressed;

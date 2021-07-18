@@ -50,7 +50,13 @@ dependencies:
   url_launcher_windows: ^2.0.0
   html: ^0.15.0
   carousel_slider: ^3.0.0
+  file_selector:
+    git:
+      url: https://github.com/marchdev-tk/file_selector
 
+
+dependency_overrides:
+  plugin_platform_interface: '>=2.0.0'
 
 
 dev_dependencies:

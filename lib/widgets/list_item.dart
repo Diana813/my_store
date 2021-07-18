@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:my_store/utlis/colors.dart';
+import 'package:my_store/utils/colors.dart';
 
 class ListItemMyStore extends StatelessWidget {
   final bool at_the_auction_value;

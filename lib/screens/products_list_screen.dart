@@ -3,15 +3,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:my_store/action_allegro/allegro_api/get/get_product_data.dart';
+import 'package:my_store/action_allegro/models/products/products.dart';
 import 'package:my_store/action_display_list_of_items/brain/display_list.dart';
 import 'package:my_store/action_display_list_of_items/brain/products_list_brain.dart';
 import 'package:my_store/action_display_list_of_items/models/product_model.dart';
 import 'package:my_store/action_go_to_another_screen/display_popup.dart';
 import 'package:my_store/action_mysql/items_table.dart';
 import 'package:my_store/action_mysql/prices_table.dart';
-import 'package:my_store/action_post/allegro_api/networking.dart';
-import 'package:my_store/action_post/models/products/product.dart';
-import 'package:my_store/utlis/navigation.dart';
+import 'package:my_store/utils/navigation.dart';
 import 'package:my_store/widgets/app_window.dart' as app_window;
 import 'package:my_store/widgets/count_min_prices_dialog.dart';
 import 'package:my_store/widgets/list_header.dart';
@@ -267,7 +267,7 @@ class _Products_PageState extends State<Products_Page> {
         ItemsTable.insertImageUrlData(tableName, index, url);
         continue;
       }
-      ProductJson product = ProductJson.fromJson(response);
+      Products product = Products.fromJson(response);
       if (product.offers != null &&
           product.offers != [] &&
           product.offers[0].photos.isNotEmpty) {

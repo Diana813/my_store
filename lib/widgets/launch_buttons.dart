@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:my_store/utlis/colors.dart';
+import 'package:my_store/utils/colors.dart';
 
 class LaunchUrl extends StatelessWidget {
   final Function launchURLAmazon;
@@ -78,7 +78,7 @@ class LaunchUrl extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: ElevatedButton(
             onPressed: launchURLYouTube,
-            child: Image.asset('assets/images/you_tube.png'),
+            child: Image.asset('assets/images/you_tube.png',),
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(
                 Color(

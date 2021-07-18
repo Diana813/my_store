@@ -8,10 +8,11 @@ import 'package:my_store/action_display_list_of_items/brain/products_list_brain.
 import 'package:my_store/action_display_list_of_items/models/product_model.dart';
 import 'package:my_store/action_mysql/items_table.dart';
 import 'package:my_store/action_mysql/mySql.dart';
+import 'package:my_store/action_mysql/my_offers_table.dart';
 import 'package:my_store/action_open_file/brain/file_picker_brain.dart';
 import 'package:my_store/action_open_file/brain/read_file.dart';
 import 'package:my_store/action_open_file/brain/welcome_screen_brain.dart';
-import 'package:my_store/utlis/colors.dart';
+import 'package:my_store/utils/colors.dart';
 import 'package:my_store/widgets/popup_files_list.dart';
 import 'package:my_store/widgets/raised_button_my_store.dart';
 import 'package:mysql1/mysql1.dart' as mysql;
@@ -36,6 +37,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   void initState() {
     MySql.dBconnection();
+    MyOffersTable.createTableMyOffer();
     _loading = false;
     _setFiles();
 
@@ -220,6 +222,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     'Dodaj plik',
                     style: TextStyle(fontSize: 18),
                   ),
+                  color: Color(ColorsMyStore.AccentColor),
                 ),
               ],
             ),
@@ -231,22 +234,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     height: 255,
                     child: Image.asset('assets/images/lista.jpg')),
                 RaisedButtonMyStore(
-                  paddingHorizontal: 50,
-                  paddingVertical: 20,
-                  onClick: () {
-                    _checkIfFileListItemsIsEmpty();
-                    if (listOfFilestIsNotEmpty == false) {
-                      _setFiles();
-                      listOfFilestIsNotEmpty = true;
-                    }
-                    _openFilesList(context, files, thereAreItemsInTheList,
-                        items, widget.filePath);
-                  },
-                  childWidget: Text(
-                    'Wybierz plik',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
+                    paddingHorizontal: 50,
+                    paddingVertical: 20,
+                    onClick: () {
+                      _checkIfFileListItemsIsEmpty();
+                      if (listOfFilestIsNotEmpty == false) {
+                        _setFiles();
+                        listOfFilestIsNotEmpty = true;
+                      }
+                      _openFilesList(context, files, thereAreItemsInTheList,
+                          items, widget.filePath);
+                    },
+                    childWidget: Text(
+                      'Wybierz plik',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    color: Color(ColorsMyStore.AccentColor)),
               ],
             ),
           ],
