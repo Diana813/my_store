@@ -80,14 +80,16 @@ class OfferImages {
     return imageUrls;
   }
 
-  setMyOfferImages(List<String> images) {
-    List<Photo> photos = [];
+  setMyOfferImages() async {
+    List<Photo> myPhotos = [];
+    List<dynamic> images = await downloadUrlsFromAllegro(photos);
+
     for (int i = 0; i < images.length; i++) {
       Photo photo = new Photo();
       photo.url = images.elementAt(i);
-      photos.add(photo);
+      myPhotos.add(photo);
     }
-    return photos;
+    return myPhotos;
   }
 
   static getPhotosFromDb(String EAN) async {

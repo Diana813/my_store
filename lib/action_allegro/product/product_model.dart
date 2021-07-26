@@ -7,7 +7,7 @@ import 'package:my_store/action_allegro/models/products/description/description_
 import 'package:my_store/action_allegro/models/products/parameters/parameter.dart';
 import 'package:my_store/action_allegro/models/products/products.dart';
 import 'package:my_store/action_create_offer/bindProduct.dart';
-import 'package:my_store/action_create_offer/ofer_param.dart';
+import 'package:my_store/action_create_offer/offer_param.dart';
 import 'package:my_store/action_create_offer/offer_categories.dart';
 import 'package:my_store/action_create_offer/offer_images.dart';
 import 'package:my_store/action_create_offer/offer_model.dart';

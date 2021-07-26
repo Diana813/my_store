@@ -8,7 +8,6 @@ import 'package:my_store/action_allegro/models/offer_parameter/offer_parameters.
 import 'package:my_store/action_create_offer/offer_model.dart';
 import 'package:my_store/action_allegro/models/offer_photo.dart';
 
-
 const offerUrl = 'https://api.allegro.pl/sale/offers';
 
 class PostOffer {
@@ -17,7 +16,8 @@ class PostOffer {
       "name": offer.title,
       "images": offer.images,
       'category': category,
-      'product': {'id': offer.productId}
+      'product': {'id': offer.productId},
+      'parameters': offer.parameters,
     });
     print(data);
     await AuthenticateClient.readTokens();
@@ -108,7 +108,8 @@ class PostOffer {
       HttpHeaders.acceptHeader: 'application/vnd.allegro.public.v1+json',
     });
     if (response.statusCode == 200) {
-      OfferParameters parameters = OfferParameters.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+      OfferParameters parameters = OfferParameters.fromJson(
+          json.decode(utf8.decode(response.bodyBytes)));
       print(response.body);
       return parameters;
     } else {

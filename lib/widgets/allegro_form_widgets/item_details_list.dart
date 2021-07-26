@@ -8,7 +8,7 @@ import 'package:my_store/utils/colors.dart';
 import 'package:my_store/widgets/allegro_form_widgets/category_widget.dart';
 import 'package:my_store/widgets/allegro_form_widgets/images_widget.dart';
 import 'package:my_store/widgets/allegro_form_widgets/offer_title_widget.dart';
-import 'package:my_store/widgets/allegro_form_widgets/parameters_widget.dart';
+import 'package:my_store/widgets/allegro_form_widgets/param_widgets/parameters_widget.dart';
 import 'package:my_store/widgets/allegro_form_widgets/product_widget.dart';
 
 import 'description_widget.dart';
@@ -47,7 +47,8 @@ class ItemDetailsList extends StatelessWidget {
   final List<Widget> displayRequiredParams;
   final List<Widget> displayRequiredForProductParams;
   final List<Widget> displayOtherParams;
-  final Function getParameters;
+  final Function hideParameters;
+  final bool parametersVisibility;
 
   ItemDetailsList({
     this.item,
@@ -81,7 +82,8 @@ class ItemDetailsList extends StatelessWidget {
     @required this.displayRequiredParams,
     @required this.displayRequiredForProductParams,
     @required this.displayOtherParams,
-    @required this.getParameters,
+    @required this.hideParameters,
+    @required this.parametersVisibility,
   });
 
   getColor() {
@@ -129,10 +131,11 @@ class ItemDetailsList extends StatelessWidget {
             EAN: EAN,
             parameters: parameters,
             offer: offer,
-            getParameters: getParameters,
+            hideParameters: hideParameters,
             displayOtherParams: displayOtherParams,
             displayRequiredForProductParams: displayRequiredForProductParams,
             displayRequiredParams: displayRequiredParams,
+            parametersVisibility: parametersVisibility,
           ),
         ],
       ),

@@ -6,6 +6,8 @@ import 'package:my_store/action_create_offer/bindProduct.dart';
 import 'package:my_store/action_create_offer/offer_model.dart';
 import 'package:my_store/widgets/allegro_form_widgets/category_widget.dart';
 
+import 'offer_param.dart';
+
 class OfferCategories {
   String categoryDropDownValue = '';
   List<Category> categories = [];
@@ -48,7 +50,8 @@ class OfferCategories {
       Function getCategories,
       BindProduct bindProduct,
       OfferModel myOffer,
-      Function updateState) async {
+      Function updateState,
+      OfferParam offerParam) async {
     if (categories.elementAt(CategoryPart.indexOfCategory).leaf == false) {
       categoryName = categoryName + newValue + ' -> ';
       await getCategories(
@@ -68,6 +71,10 @@ class OfferCategories {
       }
       showCheckBoxes(bindProduct);
       myOffer.category = categories.elementAt(CategoryPart.indexOfCategory);
+
+      if (offerParam.offerParameters != null)
+        print(offerParam.offerParameters.length);
+      await offerParam.getParameters(myOffer, updateState);
     }
 
     updateState();
