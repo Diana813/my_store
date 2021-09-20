@@ -1,8 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_store/action_allegro/models/products/description/description.dart';
 import 'package:my_store/action_allegro/models/products/parameters/parameter.dart';
 import 'package:my_store/action_allegro/models/products/product.dart';
+import 'package:my_store/action_create_offer/models/pricing/selling_mode.dart';
 import 'package:my_store/action_create_offer/offer_model.dart';
 import 'package:my_store/utils/colors.dart';
 import 'package:my_store/widgets/allegro_form_widgets/category_widget.dart';
@@ -10,23 +12,20 @@ import 'package:my_store/widgets/allegro_form_widgets/images_widget.dart';
 import 'package:my_store/widgets/allegro_form_widgets/offer_title_widget.dart';
 import 'package:my_store/widgets/allegro_form_widgets/param_widgets/parameters_widget.dart';
 import 'package:my_store/widgets/allegro_form_widgets/product_widget.dart';
+import 'package:my_store/widgets/allegro_form_widgets/stock_widget.dart';
 
-import 'description_widget.dart';
+import 'description_widgets/description_widget.dart';
+import 'selling_mode_widget.dart';
 
-class ItemDetailsList extends StatelessWidget {
+class ItemDetailsList extends StatefulWidget {
   final Product item;
-  List<String> imageFiles;
   final Function onTap;
   final Function deletePhoto;
-  var tapPosition;
   final String EAN;
   String name;
-  String description;
   List<Parameter> parameters;
   final TextEditingController nameController;
-  final TextEditingController descriptionController;
   final String categoryName;
-  var iconButtonColor = Color(ColorsMyStore.AccentColor);
   final CarouselController caruselController;
   final Function deleteAllPhotos;
   final String photosTitle;
@@ -49,17 +48,16 @@ class ItemDetailsList extends StatelessWidget {
   final List<Widget> displayOtherParams;
   final Function hideParameters;
   final bool parametersVisibility;
+  final SellingMode sellingMode;
+  final String price;
 
   ItemDetailsList({
     this.item,
-    @required this.imageFiles,
     @required this.onTap,
     @required this.EAN,
     @required this.name,
-    @required this.description,
     @required this.parameters,
     @required this.nameController,
-    @required this.descriptionController,
     @required this.categoryName,
     @required this.caruselController,
     @required this.deleteAllPhotos,
@@ -84,7 +82,18 @@ class ItemDetailsList extends StatelessWidget {
     @required this.displayOtherParams,
     @required this.hideParameters,
     @required this.parametersVisibility,
+    @required this.sellingMode,
+    @required this.price,
   });
+
+  @override
+  State<ItemDetailsList> createState() => _ItemDetailsListState();
+}
+
+class _ItemDetailsListState extends State<ItemDetailsList> {
+  var tapPosition;
+
+  var iconButtonColor = Color(ColorsMyStore.AccentColor);
 
   getColor() {
     iconButtonColor = Color(ColorsMyStore.PrimaryColor);
@@ -95,47 +104,56 @@ class ItemDetailsList extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.baseline,
         textBaseline: TextBaseline.alphabetic,
         children: <Widget>[
           ImagesPart(
-            imageFiles: imageFiles,
-            onTap: onTap,
-            caruselController: caruselController,
-            deleteAllPhotos: deleteAllPhotos,
-            deletePhoto: deletePhoto,
-            photosTitle: photosTitle,
-            shouldWarn: shouldWarn,
-            warning: warning,
+            imageFiles: widget.offer.images,
+            onTap: widget.onTap,
+            caruselController: widget.caruselController,
+            deleteAllPhotos: widget.deleteAllPhotos,
+            deletePhoto: widget.deletePhoto,
+            photosTitle: widget.photosTitle,
+            shouldWarn: widget.shouldWarn,
+            warning: widget.warning,
           ),
-          TitlePart(nameController: nameController),
-          DescriptionPart(descriptionController: descriptionController),
+          TitlePart(nameController: widget.nameController),
+          DescriptionPart(
+            myOffer: widget.offer,
+          ),
           CategoryPart(
-            categoryName: categoryName,
-            categoryDropDownValue: categoryDropDownValue,
-            chooseCategory: chooseCategory,
-            categories: categories,
-            canBindWithProduct: canBindWithProduct,
-            canCreateProduct: canCreateProduct,
-            resetCategory: resetCategory,
-            bindingInfoVisible: bindingInfoVisible,
+            categoryName: widget.categoryName,
+            categoryDropDownValue: widget.categoryDropDownValue,
+            chooseCategory: widget.chooseCategory,
+            categories: widget.categories,
+            canBindWithProduct: widget.canBindWithProduct,
+            canCreateProduct: widget.canCreateProduct,
+            resetCategory: widget.resetCategory,
+            bindingInfoVisible: widget.bindingInfoVisible,
           ),
           ProductPart(
-            bindWithProduct: bindWithProduct,
-            addProductQuestion: addProductQuestion,
-            onBindWithProductChange: onBindWithProductChange,
-            bindingVisible: bindingVisible,
+            bindWithProduct: widget.bindWithProduct,
+            addProductQuestion: widget.addProductQuestion,
+            onBindWithProductChange: widget.onBindWithProductChange,
+            bindingVisible: widget.bindingVisible,
           ),
           ParametersPart(
-            EAN: EAN,
-            parameters: parameters,
-            offer: offer,
-            hideParameters: hideParameters,
-            displayOtherParams: displayOtherParams,
-            displayRequiredForProductParams: displayRequiredForProductParams,
-            displayRequiredParams: displayRequiredParams,
-            parametersVisibility: parametersVisibility,
+            EAN: widget.EAN,
+            parameters: widget.parameters,
+            offer: widget.offer,
+            hideParameters: widget.hideParameters,
+            displayOtherParams: widget.displayOtherParams,
+            displayRequiredForProductParams:
+                widget.displayRequiredForProductParams,
+            displayRequiredParams: widget.displayRequiredParams,
+            parametersVisibility: widget.parametersVisibility,
+          ),
+          SellingModePart(
+            sellingMode: widget.sellingMode,
+            price: widget.price,
+          ),
+          StockPart(
+            offerModel: widget.offer,
           ),
         ],
       ),

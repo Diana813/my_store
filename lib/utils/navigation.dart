@@ -19,17 +19,19 @@ class NavigationMyStore {
 
   static closeApp() async {
     MySqlConnection conn = await WelcomeScreen.connection;
+    if(conn != null)
     await conn.close();
     appWindow.close();
   }
 
-  static navigationForwardToAllegroScreen(
-      List<Product> items, BuildContext context, int index) async {
+  static navigationForwardToAllegroScreen(List<Product> items,
+      BuildContext context, int index, String price) async {
     bool result = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => new AllegroForm(
                 product: items.elementAt(index),
+                price: price,
               )),
     );
     return result;

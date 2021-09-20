@@ -18,6 +18,9 @@ class PostOffer {
       'category': category,
       'product': {'id': offer.productId},
       'parameters': offer.parameters,
+      'description': offer.description,
+      'sellingMode': offer.sellingMode,
+      'stock': offer.stock,
     });
     print(data);
     await AuthenticateClient.readTokens();
@@ -95,10 +98,16 @@ class PostOffer {
   }
 
   static Future<OfferParameters> getParameters(OfferModel offer) async {
-    if (offer.category == null) {
+    if (offer.category == null && offer.productCategory == null) {
       return null;
     }
-    String categoryId = offer.category.id;
+    String categoryId;
+    if (offer.category != null) {
+      categoryId = offer.category.id;
+    } else {
+      categoryId = offer.productCategory.id;
+    }
+
     await AuthenticateClient.readTokens();
     String token = 'Bearer ' + AuthenticateClient.accessToken;
     String url =
@@ -110,7 +119,6 @@ class PostOffer {
     if (response.statusCode == 200) {
       OfferParameters parameters = OfferParameters.fromJson(
           json.decode(utf8.decode(response.bodyBytes)));
-      print(response.body);
       return parameters;
     } else {
       print('PostOffer: parameters status code:');

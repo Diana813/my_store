@@ -13,6 +13,9 @@ class PricesTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       print('tworzę tabelę prices');
       if (connection == null) {
         return;
@@ -49,6 +52,9 @@ class PricesTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       await connection.query(
           'insert into prices (euro, price, margin, date, shipmentDate) values (?,?,?,?,?)',
           [euro, price, margin, date, shipment]);
@@ -69,6 +75,9 @@ class PricesTable {
       } catch (Exception) {
         MySql.dBconnection();
         connection = await WelcomeScreen.connection;
+        if(connection == null){
+          return;
+        }
         print('czytam z tabeli prices');
         if (connection == null) {
           return;

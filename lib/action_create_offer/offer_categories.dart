@@ -52,6 +52,9 @@ class OfferCategories {
       OfferModel myOffer,
       Function updateState,
       OfferParam offerParam) async {
+    if (categoryName == null) {
+      categoryName = '';
+    }
     if (categories.elementAt(CategoryPart.indexOfCategory).leaf == false) {
       categoryName = categoryName + newValue + ' -> ';
       await getCategories(

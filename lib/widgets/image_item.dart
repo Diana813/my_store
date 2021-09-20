@@ -2,20 +2,20 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_store/action_allegro/models/products/images/photos.dart';
 
 class ImageItem extends StatelessWidget {
-  final List<String> imgList;
+  final List<Photo> imgList;
   final String filePath;
-
 
   ImageItem({this.imgList, this.filePath});
 
-  _displayImages(var imageFiles, int index) {
-    if(!imageFiles.elementAt(index).contains('http')){
-      return Image.file(new File(imageFiles.elementAt(index)),
+  _displayImages(List<Photo> imageFiles, int index) {
+    if (!imageFiles.elementAt(index).url.contains('http')) {
+      return Image.file(new File(imageFiles.elementAt(index).url),
           fit: BoxFit.contain);
     } else {
-      return Image.network(imageFiles.elementAt(index), fit: BoxFit.contain);
+      return Image.network(imageFiles.elementAt(index).url, fit: BoxFit.contain);
     }
   }
 
@@ -26,7 +26,7 @@ class ImageItem extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(5.0)),
           child: Stack(
             children: <Widget>[
-              _displayImages(imgList, imgList.indexOf(filePath)),
+              _displayImages(imgList, imgList.indexWhere((element) => element.url == filePath)),
               Positioned(
                 bottom: 0.0,
                 left: 0.0,
@@ -45,7 +45,7 @@ class ImageItem extends StatelessWidget {
                   padding:
                       EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                   child: Text(
-                    'Zdjęcie nr ${imgList.indexOf(filePath) + 1}',
+                    'Zdjęcie nr ${imgList.indexWhere((element) => element.url == filePath) + 1}',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20.0,

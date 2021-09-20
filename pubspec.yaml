@@ -50,13 +50,19 @@ dependencies:
   url_launcher_windows: ^2.0.0
   html: ^0.15.0
   carousel_slider: ^3.0.0
+  # modyfikowana przeze mnie
   file_selector:
     git:
       url: https://github.com/marchdev-tk/file_selector
 
+  flutter_markdown: ^0.6.4
+  # modyfikowana przeze mnie
+  zefyrka: ^1.0.10
+
 
 dependency_overrides:
   plugin_platform_interface: '>=2.0.1'
+  html: ^0.14.0
 
 
 dev_dependencies:

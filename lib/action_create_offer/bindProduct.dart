@@ -5,7 +5,7 @@ import 'offer_model.dart';
 class BindProduct {
   bool canCreateProduct = false;
   bool canBindWithProduct = false;
-  bool bindWithProduct = false;
+  bool bindWithProduct = true;
   bool productExist = false;
   bool checkBoxBindProductVisible = false;
   bool checkBoxBindingInfoVisible = false;
@@ -30,7 +30,7 @@ class BindProduct {
   setProductId(Products productJson, OfferModel offer) {
     if (productJson == null) return;
     if (bindWithProduct) {
-      offer.productId = productJson.offers[0].id;
+      offer.productId = productJson.products[0].id;
     } else {
       offer.productId = null;
     }

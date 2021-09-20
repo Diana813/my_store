@@ -1,4 +1,3 @@
-import 'package:my_store/action_allegro/models/offer_parameter/offer_parameter.dart';
 import 'package:my_store/action_allegro/models/products/category/category.dart';
 import 'package:my_store/action_allegro/models/products/description/description.dart';
 import 'package:my_store/action_allegro/models/products/images/photos.dart';

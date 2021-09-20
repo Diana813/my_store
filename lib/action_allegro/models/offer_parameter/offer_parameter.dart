@@ -9,10 +9,10 @@ class OfferParameter {
   String type;
   bool required;
   bool requiredForProduct;
+  String unit;
   ParameterOptions options;
   Restrictions restrictions;
   List<DictionaryItem> dictionary;
-
 
   OfferParameter(
       {this.id,
@@ -20,6 +20,7 @@ class OfferParameter {
       this.type,
       this.required,
       this.requiredForProduct,
+      this.unit,
       this.options,
       this.restrictions,
       this.dictionary});
@@ -48,6 +49,7 @@ class OfferParameter {
       type: json['type'] as String,
       required: json['required'],
       requiredForProduct: json['requiredForProduct'],
+      unit: json['unit'],
       options: _options,
       restrictions: _restrictions,
       dictionary: _dictionary,
@@ -61,6 +63,7 @@ class OfferParameter {
       'type': type,
       'required': required,
       'requiredForProduct': requiredForProduct,
+      'unit': unit,
       'options': options,
       'restrictions': restrictions,
       'dictionary': dictionary,

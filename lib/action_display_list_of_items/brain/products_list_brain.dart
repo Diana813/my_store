@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:my_store/action_display_list_of_items/models/product_model.dart';
 import 'package:my_store/action_go_to_another_screen/display_popup.dart';
+import 'package:my_store/screens/welcome_screen.dart';
 import 'package:my_store/utils/navigation.dart';
 
 class ProductsListBrain {
@@ -72,7 +73,9 @@ class ProductsListBrain {
   }
 
   static savingItemsInfo(bool loaded, bool savingData) {
-    if (loaded) {
+    if (WelcomeScreen.connection == null) {
+      return 'Brak połączenia z bazą danych';
+    } else if (loaded) {
       return 'Tabela jest zapisana w bazie danych';
     } else if (loaded == false && savingData == false) {
       return 'Przerwano zapisywanie tabeli';

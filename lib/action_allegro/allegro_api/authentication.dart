@@ -8,8 +8,8 @@ import 'package:path_provider/path_provider.dart';
 const clientID = '';
 const clientSecret =
     '';
-const url = 'https://allegro.pl/auth/oauth/device';
-const tokenUrl = 'https://allegro.pl/auth/oauth/token';
+const url = '';
+const tokenUrl = '';
 
 class AuthenticateClient {
   static String _device_code = '';
@@ -31,10 +31,8 @@ class AuthenticateClient {
       'client_id': clientID,
     });
     if (response.statusCode == 200) {
-      print(response.body);
       Map<String, dynamic> decodeResponse = jsonDecode(response.body);
       _device_code = decodeResponse['device_code'];
-      print('idę do strony weryfikayjnej');
       String verificationUrl = decodeResponse['verification_uri_complete'];
       NetworkSearchBrain.launchURL(verificationUrl);
       getAccessToken();
@@ -54,10 +52,8 @@ class AuthenticateClient {
         HttpHeaders.authorizationHeader: basicAuth,
         HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
       });
-      print(response.statusCode);
     } while (response.statusCode != 200);
     Map<String, dynamic> decodeResponse = jsonDecode(response.body);
-    print(response.body);
     _accessToken = decodeResponse['access_token'];
     _refreshToken = decodeResponse['refresh_token'];
     await _saveTokens(accessToken, refreshToken);

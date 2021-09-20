@@ -10,6 +10,7 @@ import 'package:my_store/action_display_list_of_items/brain/products_list_brain.
 import 'package:my_store/action_display_list_of_items/models/product_model.dart';
 import 'package:my_store/action_go_to_another_screen/display_popup.dart';
 import 'package:my_store/action_mysql/items_table.dart';
+import 'package:my_store/action_mysql/mySql.dart';
 import 'package:my_store/action_mysql/prices_table.dart';
 import 'package:my_store/utils/navigation.dart';
 import 'package:my_store/widgets/app_window.dart' as app_window;
@@ -27,7 +28,7 @@ class Products_Page extends StatefulWidget {
       : super(key: key);
   var productsList;
   final filePath;
-  final itemsTableName;
+  var itemsTableName;
 
   @override
   _Products_PageState createState() => new _Products_PageState();
@@ -56,6 +57,7 @@ class _Products_PageState extends State<Products_Page> {
     _readPricesData();
     _loadDataToDb();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -96,42 +98,43 @@ class _Products_PageState extends State<Products_Page> {
                         String myMargin;
                         showDialog(
                           context: context,
-                          builder: (BuildContext context) => CountPrices(
-                            onChangeEuroValue: (value) {
-                              myEuro = value;
-                            },
-                            euroRate: _euroRate,
-                            newRetail: _newRetail,
-                            onChangeNewRetailValue: (value) {
-                              myRetail = value;
-                            },
-                            margin: _margin,
-                            onChangeMarginValue: (value) {
-                              myMargin = value;
-                            },
-                            onSubmitted: () async {
-                              if (myEuro != null &&
-                                  myRetail != null &&
-                                  myMargin != null) {
-                                setState(() {
-                                  _euroRate = myEuro;
-                                  _newRetail = myRetail;
-                                  _margin = myMargin;
-                                });
-                                DateTime date = new DateTime(
-                                    _now.year, _now.month, _now.day);
-                                await PricesTable.insertDataToPrices(
-                                    _euroRate,
-                                    _newRetail,
-                                    _margin,
-                                    date.toString().substring(0, 10),
-                                    ProductsListBrain.getItemsTableName(
-                                        _items));
-                              }
+                          builder: (BuildContext context) =>
+                              CountPrices(
+                                onChangeEuroValue: (value) {
+                                  myEuro = value;
+                                },
+                                euroRate: _euroRate,
+                                newRetail: _newRetail,
+                                onChangeNewRetailValue: (value) {
+                                  myRetail = value;
+                                },
+                                margin: _margin,
+                                onChangeMarginValue: (value) {
+                                  myMargin = value;
+                                },
+                                onSubmitted: () async {
+                                  if (myEuro != null &&
+                                      myRetail != null &&
+                                      myMargin != null) {
+                                    setState(() {
+                                      _euroRate = myEuro;
+                                      _newRetail = myRetail;
+                                      _margin = myMargin;
+                                    });
+                                    DateTime date = new DateTime(
+                                        _now.year, _now.month, _now.day);
+                                    await PricesTable.insertDataToPrices(
+                                        _euroRate,
+                                        _newRetail,
+                                        _margin,
+                                        date.toString().substring(0, 10),
+                                        ProductsListBrain.getItemsTableName(
+                                            _items));
+                                  }
 
-                              Navigator.of(context).pop();
-                            },
-                          ),
+                                  Navigator.of(context).pop();
+                                },
+                              ),
                         );
 
                         break;
@@ -139,10 +142,16 @@ class _Products_PageState extends State<Products_Page> {
                         tryToDownloadImages(
                             _items, widget.itemsTableName, context);
                         break;
+                      case 'Usuń bieżącą tabelę':
+                        MySql.deleteTable(widget.itemsTableName);
+                        setState(() {
+                          _items.clear();
+                        });
+                        break;
                     }
                   },
                   itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<String>>[
+                  <PopupMenuEntry<String>>[
                     PopupMenuItem<String>(
                       value: 'Dodaj ceny',
                       child: Text('Dodaj ceny'),
@@ -151,6 +160,11 @@ class _Products_PageState extends State<Products_Page> {
                     PopupMenuItem<String>(
                       value: 'Pobierz zdjęcia',
                       child: Text('Pobierz zdjęcia'),
+                      enabled: DisplayPopUp.savingItemsToDb ? false : true,
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'Usuń bieżącą tabelę',
+                      child: Text('Usuń bieżącą tabelę'),
                       enabled: DisplayPopUp.savingItemsToDb ? false : true,
                     ),
                   ],
@@ -222,10 +236,11 @@ class _Products_PageState extends State<Products_Page> {
               await NavigationMyStore.closeApp();
             } else {
               DisplayPopUp.displayPopup(context, widget.itemsTableName,
-                  () async {
-                DisplayPopUp.gotoAnotherScreen(widget.itemsTableName, context,
-                    await NavigationMyStore.closeApp());
-              });
+                      () async {
+                    DisplayPopUp.gotoAnotherScreen(
+                        widget.itemsTableName, context,
+                        await NavigationMyStore.closeApp());
+                  });
             }
           },
         ),
@@ -248,7 +263,7 @@ class _Products_PageState extends State<Products_Page> {
         continue;
       }
       final response =
-          await NetworkHelper.getProductData(item.EAN.split('.')[0]);
+      await NetworkHelper.getProductData(item.EAN.split('.')[0]);
       if (response == 'Brak połączenia z Allegro') {
         setState(() {
           ifVisible = false;
@@ -268,10 +283,10 @@ class _Products_PageState extends State<Products_Page> {
         continue;
       }
       Products product = Products.fromJson(response);
-      if (product.offers != null &&
-          product.offers != [] &&
-          product.offers[0].photos.isNotEmpty) {
-        url = product.offers[0].photos[0].url;
+      if (product.products != null &&
+          product.products != [] &&
+          product.products[0].photos.isNotEmpty) {
+        url = product.products[0].photos[0].url;
       }
       if (url == null) {
         url = '';
@@ -291,14 +306,15 @@ class _Products_PageState extends State<Products_Page> {
     return count;
   }
 
-  Future<bool> tryToDownloadImages(
-      var items, String itemsTableName, BuildContext context) async {
+  Future<bool> tryToDownloadImages(var items, String itemsTableName,
+      BuildContext context) async {
     DisplayPopUp.stopDownloadingImages = false;
     double count = await downloadImageUrls(items, itemsTableName);
     if (count == 0) {
       showDialog(
           context: context,
-          builder: (BuildContext context) => PopUpAllegroAuth(
+          builder: (BuildContext context) =>
+              PopUpAllegroAuth(
                 contextValue: context,
               ));
     }
@@ -365,7 +381,7 @@ class _Products_PageState extends State<Products_Page> {
       List<Product> searchedProductsData = <Product>[];
       searchedProducts.forEach((item) {
         if ((item.EAN != null &&
-                item.EAN.toLowerCase().contains(query.toLowerCase())) ||
+            item.EAN.toLowerCase().contains(query.toLowerCase())) ||
             (item.name != null &&
                 item.name.toLowerCase().contains(query.toLowerCase())) ||
             (item.totalRetail != null &&

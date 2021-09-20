@@ -28,6 +28,7 @@ class TitlePart extends StatelessWidget {
                   controller: nameController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
+                  maxLength: 50,
                   decoration: InputDecoration(
                     border: UnderlineInputBorder(),
                     labelText: 'Edytuj',

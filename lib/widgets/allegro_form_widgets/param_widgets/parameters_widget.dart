@@ -4,8 +4,6 @@ import 'package:my_store/action_allegro/models/products/parameters/parameter.dar
 import 'package:my_store/action_create_offer/offer_model.dart';
 import 'package:my_store/utils/colors.dart';
 
-import 'parameters_list.dart';
-
 class ParametersPart extends StatelessWidget {
   final String EAN;
   List<Parameter> parameters;
@@ -45,21 +43,14 @@ class ParametersPart extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: hideParameters,
-                  icon: Icon(Icons.arrow_drop_down,
-                    color: Color(ColorsMyStore.PrimaryColor),),
+                  icon: Icon(
+                    Icons.arrow_drop_down,
+                    color: Color(ColorsMyStore.PrimaryColor),
+                  ),
                 ),
               ],
             ),
           ),
-          /*ListTile(
-            title: Text(
-              'Parametry',
-              style: TextStyle(color: Color(0xFF89ACBE), fontSize: 18),
-            ),
-            subtitle: ParametersList(
-              parameters: parameters,
-            ),
-          ),*/
           Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

@@ -17,6 +17,9 @@ class ItemsTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       print('tworzę tablę');
       await connection.query(
           'CREATE TABLE IF NOT EXISTS $tableName (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,shipmentDate TEXT, ASIN TEXT, EAN TEXT, name TEXT, euro TEXT, LPN TEXT, at_auction bool, sold bool, image_url TEXT)');
@@ -45,6 +48,9 @@ class ItemsTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       print('odczytuję dane z tabeli items');
       var resultItems = await connection.query("SELECT * FROM $tableName");
       for (var row in resultItems) {
@@ -99,6 +105,9 @@ class ItemsTable {
     await createTableItems(connection, tableName);*/
 
     MySqlConnection connection = await WelcomeScreen.connection;
+    if(connection == null){
+      return;
+    }
 
     await connection.query(
         'insert into $tableName (shipmentDate, ASIN, EAN, name, euro, LPN,at_auction, sold) values (?,?,?,?,?,?,?,?)',
@@ -121,6 +130,9 @@ class ItemsTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       await connection.query("DROP TABLE IF EXISTS $tableName");
     }
   }
@@ -142,6 +154,9 @@ class ItemsTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       result = await connection.query(
           "SELECT $columnName FROM $tableName WHERE LPN = '$LPN' ORDER BY id DESC LIMIT 1");
     }
@@ -167,6 +182,9 @@ class ItemsTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       await connection.query(
           "update $tableName set image_url = '$url' where id = '$index'");
     }

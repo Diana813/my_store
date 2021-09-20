@@ -14,6 +14,9 @@ class MyOffersTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       await connection.query(
           'CREATE TABLE IF NOT EXISTS My_offers (id int NOT NULL AUTO_INCREMENT PRIMARY KEY, EAN VARCHAR(100) NOT NULL UNIQUE KEY, name TEXT, description TEXT, price TEXT, image_urls TEXT, last_usage DATE)');
     }
@@ -31,6 +34,9 @@ class MyOffersTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       await connection.query(
           "insert ignore into My_offers (EAN, name, description, price,image_urls, last_usage) values (?,?,?,?,?,?)",
           [EAN, '', '', '', '', date]);
@@ -45,6 +51,9 @@ class MyOffersTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       await connection.query(
           "update My_offers set image_urls = '$urls' where EAN = '$EAN'");
     }
@@ -58,6 +67,9 @@ class MyOffersTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       await connection.query(
           "update My_offers set last_usage = '$date' where EAN = '$EAN'");
     }
@@ -71,6 +83,9 @@ class MyOffersTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return;
+      }
       await connection
           .query("update My_offers set image_urls = '' where EAN = '$EAN'");
     }
@@ -84,6 +99,9 @@ class MyOffersTable {
     } catch (Exception) {
       MySql.dBconnection();
       connection = await WelcomeScreen.connection;
+      if(connection == null){
+        return '()';
+      }
       return await connection
           .query("select image_urls from My_offers where EAN = '$EAN'");
     }

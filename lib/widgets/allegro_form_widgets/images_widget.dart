@@ -1,11 +1,12 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_store/action_allegro/models/products/images/photos.dart';
 import 'package:my_store/utils/colors.dart';
 import 'package:my_store/widgets/image_item.dart';
 
 class ImagesPart extends StatelessWidget {
-  List<String> imageFiles;
+  List<Photo> imageFiles;
   final Function onTap;
   final Function deletePhoto;
   var tapPosition;
@@ -90,7 +91,7 @@ class ImagesPart extends StatelessWidget {
                                     deletePhoto(index, context, tapPosition);
                                   },
                                   child: ImageItem(
-                                    filePath: imageFiles.elementAt(index),
+                                    filePath: imageFiles.elementAt(index).url,
                                     imgList: imageFiles,
                                   ),
                                 );

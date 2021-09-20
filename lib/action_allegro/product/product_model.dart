@@ -1,27 +1,32 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:html/parser.dart';
 import 'package:my_store/action_allegro/allegro_api/get/get_product_data.dart';
 import 'package:my_store/action_allegro/models/categories/category.dart';
-import 'package:my_store/action_allegro/models/products/description/description_sections_items_desc.dart';
+import 'package:my_store/action_allegro/models/products/category/similar.dart';
+import 'package:my_store/action_allegro/models/products/description/description.dart';
+import 'package:my_store/action_allegro/models/products/images/photos.dart';
 import 'package:my_store/action_allegro/models/products/parameters/parameter.dart';
 import 'package:my_store/action_allegro/models/products/products.dart';
 import 'package:my_store/action_create_offer/bindProduct.dart';
-import 'package:my_store/action_create_offer/offer_param.dart';
 import 'package:my_store/action_create_offer/offer_categories.dart';
+import 'package:my_store/action_create_offer/offer_description.dart';
 import 'package:my_store/action_create_offer/offer_images.dart';
 import 'package:my_store/action_create_offer/offer_model.dart';
+import 'package:my_store/action_create_offer/offer_param.dart';
 import 'package:my_store/action_find_item_on_the_internet/network_search_brain.dart';
 
 class ProductModel {
   Products products;
+  String parentCategory = '';
 
   Future<Products> getProductByEan(String EAN) async {
     final response = await NetworkHelper.getProductData(EAN.split('.')[0]);
     if (response != null) {
       Products product = Products.fromJson(response);
-      if (product != null && product.offers != null && product.offers != []) {
-        if (product.offers.length != 0) {
+      if (product != null &&
+          product.products != null &&
+          product.products != []) {
+        if (product.products.length != 0) {
           return product;
         }
       }
@@ -36,28 +41,18 @@ class ProductModel {
 
   String getProductTitle(Products product, String productName) {
     if (product != null) {
-      return product.offers[0].offerTitle;
+      return product.products[0].offerTitle;
     } else {
       return getName(productName);
     }
   }
 
-  String getProductDescription(Products productJson) {
+  getProductDescription(Products productJson) {
     if (productJson != null) {
-      if (productJson.offers[0].offerDescription == null) {
+      if (productJson.products[0].offerDescription == null) {
         return null;
       }
-      List<Items_desc> items =
-          productJson.offers[0].offerDescription.sections[0].items;
-      String description;
-      for (Items_desc item in items) {
-        if (item.type == 'TEXT') {
-          description = parse(item.offer_description).documentElement.text;
-          break;
-        }
-        description = null;
-      }
-      return description;
+      return productJson.products[0].offerDescription;
     } else {
       return null;
     }
@@ -65,22 +60,28 @@ class ProductModel {
 
   List<Parameter> getParameters(Products productJson) {
     if (productJson != null) {
-      return productJson.offers[0].parameters;
+      return productJson.products[0].parameters;
     }
     return [];
   }
 
   getCategory(Products productJson) {
     if (productJson != null) {
-      return productJson.offers[0].category;
+      return productJson.products[0].category;
     }
   }
 
   String getCategoryId(Products productJson) {
     if (productJson != null) {
-      return productJson.offers[0].category.id;
+      return productJson.products[0].category.id;
     }
     return '';
+  }
+
+  List<Similar> getSimilars(Products productJson) {
+    if (productJson != null) {
+      return productJson.products[0].category.similars;
+    }
   }
 
   Future<String> getCategoryName(Products productJson) async {
@@ -96,6 +97,7 @@ class ProductModel {
           category = Category.fromJson(response);
           if (category != null) {
             categoryName = category.name + ' -> ' + categoryName;
+            parentCategory = category.name + ' -> ' + parentCategory;
           }
         }
         return categoryName;
@@ -109,19 +111,26 @@ class ProductModel {
       String EAN,
       OfferCategories offerCategories,
       OfferModel myOffer,
-      String description,
       TextEditingController nameController,
       String productName,
-      TextEditingController descriptionController,
       OfferParam offerParam,
       OfferImages offerImages,
-      List<String> imagesFiles,
+      OfferDescription offerDescription,
       BindProduct bindProduct,
-      Function updateProductData) async {
+      Function updateProductData,
+      Function updateState) async {
     EasyLoading.show();
     products = await getProductByEan(EAN);
     offerCategories.categoryName = await getCategoryName(products);
+    offerDescription.description = await getProductDescription(products);
     myOffer.productCategory = getCategory(products);
+    offerParam.getParameters(myOffer, updateState);
+    offerParam.parametersVisibility = true;
+    if (products == null) {
+      bindProduct.bindWithProduct = false;
+    } else {
+      bindProduct.bindWithProduct = true;
+    }
     EasyLoading.dismiss();
     updateProductData();
   }
@@ -130,26 +139,25 @@ class ProductModel {
       OfferCategories offerCategories,
       OfferParam offerParam,
       OfferImages offerImages,
-      List<String> imagesFiles,
-      BindProduct bindProduct) {
+      List<Photo> imagesFiles,
+      BindProduct bindProduct,
+      OfferDescription offerDescription,
+      OfferModel myOffer) async {
     if (products == null) {
       offerCategories.categoryName = '';
     }
     offerParam.productParameters = getParameters(products);
     offerImages.photosTitle = offerImages.displayPhotosTitle(
         products, imagesFiles, offerImages.photosFromDb);
-    offerImages.photos = offerImages.displayAllPhotos(
-        products, imagesFiles, offerImages.photosFromDb);
+    myOffer.images = await offerImages.displayAllPhotos(products, myOffer);
+    myOffer.description = getDescription(offerDescription.description, myOffer);
     bindProduct.checkIfProductExist(products);
     if (bindProduct.productExist) {
       bindProduct.checkBoxBindProductVisible = true;
       offerCategories.allowChangingCategory = false;
     }
-    bindProduct.productQuestion = bindProduct.askProductQuestion();
-  }
 
-  String getDescription() {
-    return getProductDescription(products);
+    bindProduct.productQuestion = bindProduct.askProductQuestion();
   }
 
   TextEditingController getNameController(String productName) {
@@ -158,5 +166,13 @@ class ProductModel {
 
   TextEditingController getDescriptionController(String description) {
     return TextEditingController(text: description);
+  }
+
+  Description getDescription(
+      Description productDescription, OfferModel myOffer) {
+    if (productDescription != null) {
+      myOffer.description.sections.insertAll(4, productDescription.sections);
+    }
+    return myOffer.description;
   }
 }

@@ -11,7 +11,7 @@ class WelcomeScreenBrain {
     List<String> files = [];
     var list = await MySql.getTablesList();
     if (list == null) {
-      return;
+      return files;
     }
     for (var row in list) {
       files.add(row[2].toString());
@@ -19,8 +19,12 @@ class WelcomeScreenBrain {
     return files;
   }
 
-  static Future<bool> goToProductsList(List<Product> items,
-      BuildContext context, String filePath, String tableName) async {
+  static Future<bool> goToProductsList(
+      List<Product> items,
+      BuildContext context,
+      String filePath,
+      String tableName,
+      updateState) async {
     DisplayPopUp.stopDownloadingImages = false;
     bool result = await Navigator.push(
       context,
@@ -30,7 +34,7 @@ class WelcomeScreenBrain {
                 filePath: filePath,
                 itemsTableName: tableName,
               )),
-    );
+    ).then((value) => updateState());
     return result;
   }
 

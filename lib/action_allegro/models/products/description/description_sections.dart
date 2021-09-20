@@ -1,17 +1,21 @@
 import 'description_sections_items_desc.dart';
 
-class Sections {
+class Section {
   List<Items_desc> items;
 
-  Sections({this.items});
+  Section({this.items});
 
-  factory Sections.fromJson(Map<String, dynamic> json) {
+  factory Section.fromJson(Map<String, dynamic> json) {
     var itemObject = json['items'] as List;
     List<Items_desc> _items = itemObject
         .map((items_desc) => Items_desc.fromJson(items_desc))
         .toList();
-    return Sections(
+    return Section(
       items: _items,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'items': items};
   }
 }

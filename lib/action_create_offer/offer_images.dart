@@ -4,25 +4,27 @@ import 'package:my_store/action_allegro/allegro_api/post/post_offer.dart';
 import 'package:my_store/action_allegro/models/products/images/photos.dart';
 import 'package:my_store/action_allegro/models/products/products.dart';
 import 'package:my_store/action_allegro/product/product_model.dart';
+import 'package:my_store/action_create_offer/offer_model.dart';
 import 'package:my_store/action_mysql/my_offers_table.dart';
 
 class OfferImages {
   bool shouldWarn = false;
-  List<String> photos = [];
   List<String> photosFromDb = [];
   String photosTitle = '';
+  bool cannotDelete = false;
 
   List<String> getPhotosFromAllegro(Products productJson) {
     List<String> imagesFiles = [];
-    if (productJson != null && productJson.offers[0].photos.length != 0) {
-      for (int i = 0; i < productJson.offers[0].photos.length; i++) {
-        imagesFiles.add(productJson.offers[0].photos[i].url);
+    if (productJson != null && productJson.products[0].photos.length != 0) {
+      for (int i = 0; i < productJson.products[0].photos.length; i++) {
+        imagesFiles.add(productJson.products[0].photos[i].url);
       }
     }
     return imagesFiles;
   }
 
-  addOwnPhotosToTheList(List<String> files, List<String> photos) {
+  addOwnPhotosToTheList(List<String> files) {
+    List<String> photos = [];
     if (photos == null) {
       photos = [];
     }
@@ -30,20 +32,48 @@ class OfferImages {
     return photos;
   }
 
-  deleteListOfPhotos(List<String> imagesFiles, String EAN) async {
+  deleteListOfPhotos(List<Photo> imagesFiles, String EAN, Products productJson,
+      OfferModel myOffer) async {
+    List<Photo> usedPhotos = [];
+    for (int i = 0; i < imagesFiles.length; i++) {
+      if (photoIsUsedInProductDescription(imagesFiles, i, productJson)) {
+        usedPhotos.add(imagesFiles[i]);
+      }
+    }
     imagesFiles.clear();
-    photosTitle = displayPhotosTitle(null, photos, photosFromDb);
+    imagesFiles.addAll(usedPhotos);
+    photosTitle = displayPhotosTitle(null, myOffer.images, photosFromDb);
     return imagesFiles;
   }
 
-  deletePhoto(int index, List<String> imagesFiles, String EAN,
-      Products products) async {
+  deletePhoto(int index, List<Photo> imagesFiles, String EAN,
+      OfferModel myOffer) async {
     imagesFiles.removeAt(index);
-    photosTitle = displayPhotosTitle(null, photos, photosFromDb);
+    photosTitle = displayPhotosTitle(null, myOffer.images, photosFromDb);
     return imagesFiles;
   }
 
-  displayPhotosTitle(Products productJson, List<String> imagesFiles,
+  photoIsUsedInProductDescription(
+      List<Photo> imagesFiles, int index, Products productJson) {
+    if (productJson != null &&
+        productJson.products[0].offerDescription != null) {
+      for (int i = 0;
+          i < productJson.products[0].offerDescription.sections.length;
+          i++) {
+        for (int j = 0;
+            j <
+                productJson
+                    .products[0].offerDescription.sections[i].items.length;
+            j++)
+          if (productJson
+                  .products[0].offerDescription.sections[i].items[j].url ==
+              imagesFiles[index].url) return true;
+      }
+    }
+    return false;
+  }
+
+  displayPhotosTitle(Products productJson, List<Photo> imagesFiles,
       List<dynamic> allegroImagesFromDb) {
     List<String> imagesFromAllegro = getPhotosFromAllegro(productJson);
     if (imagesFiles.isNotEmpty || allegroImagesFromDb.isNotEmpty) {
@@ -80,7 +110,7 @@ class OfferImages {
     return imageUrls;
   }
 
-  setMyOfferImages() async {
+  setMyOfferImages(List<String> photos) async {
     List<Photo> myPhotos = [];
     List<dynamic> images = await downloadUrlsFromAllegro(photos);
 
@@ -106,53 +136,65 @@ class OfferImages {
     return photos;
   }
 
-  static copyPaste() {}
-
-  List<String> displayAllPhotos(Products productJson, List<String> imagesFiles,
-      List<String> allegroImagesFromDb) {
+  Future<List<Photo>> displayAllPhotos(Products productJson, OfferModel offerModel) async {
     List<String> imagesFromAllegro = getPhotosFromAllegro(productJson);
-    if (allegroImagesFromDb.isNotEmpty) {
-      return allegroImagesFromDb;
-    } else if (imagesFiles.isNotEmpty) {
-      return imagesFiles;
+    if (photosFromDb.isNotEmpty) {
+      return await setMyOfferImages(photosFromDb);
     } else if (imagesFromAllegro.isNotEmpty) {
-      return imagesFromAllegro;
+      return await setMyOfferImages(imagesFromAllegro);
+    } else if (offerModel.images.isNotEmpty) {
+      return offerModel.images;
     } else {
       return [];
     }
   }
 
-  imageListLimitWarning(List<String> photos) {
+  imageListLimitWarning(List<Photo> photos) {
     if (photos.length > 16) {
       shouldWarn = true;
       return 'Możesz dodać maksymalnie 16 zdjęć. Usuń ' +
           (photos.length - 16).toString() +
-          ' zdjęć.';
+          '.';
     } else {
       return '';
     }
   }
 
-  showPopupMenuToDeletePhoto(BuildContext context, var tapPosition, String EAN,
-      ProductModel productModel, int index, Function updateState) {
+  showPopupMenuToDeletePhoto(
+      BuildContext context,
+      var tapPosition,
+      String EAN,
+      ProductModel productModel,
+      int index,
+      Function updateState,
+      OfferModel myOffer) {
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
     showMenu<String>(
       context: context,
       position: RelativeRect.fromRect(
           tapPosition & const Size(40, 40), Offset.zero & overlay.size),
       items: [
-        PopupMenuItem<String>(child: const Text('Usuń'), value: '1'),
+        PopupMenuItem<String>(
+            child: photoIsUsedInProductDescription(
+                    myOffer.images, index, productModel.products)
+                ? Text('Usuń',
+                    style: TextStyle(decoration: TextDecoration.lineThrough))
+                : Text('Usuń'),
+            value: '1'),
       ],
       elevation: 8.0,
     ).then<void>((String itemSelected) async {
       if (itemSelected == null) return;
 
       if (itemSelected == "1") {
-        photos = await deletePhoto(index, photos, EAN, productModel.products);
-        imageListLimitWarning(photos);
-        print('Usuwam zdjęcie');
-        print(photos.length);
-        updateState();
+        if (photoIsUsedInProductDescription(
+                myOffer.images, index, productModel.products) ==
+            false) {
+          myOffer.images =
+              await deletePhoto(index, myOffer.images, EAN, myOffer);
+          imageListLimitWarning(myOffer.images);
+          updateState();
+        }
       }
     });
   }

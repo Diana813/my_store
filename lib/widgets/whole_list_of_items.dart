@@ -110,7 +110,14 @@ class _WholeListState extends State<WholeList> {
                 if (DisplayPopUp.savingItemsToDb == false &&
                     DisplayPopUp.downloadingImages == false) {
                   await NavigationMyStore.navigationForwardToAllegroScreen(
-                      widget.items, context, index);
+                      widget.items,
+                      context,
+                      index,
+                      ProductsListBrain.displayMinPrize(
+                          widget.euroRate,
+                          widget.newRetail,
+                          widget.margin,
+                          widget.items.elementAt(index).totalRetail));
                 } else {
                   DisplayPopUp.displayPopup(context, widget.tableName,
                       () async {
@@ -122,7 +129,16 @@ class _WholeListState extends State<WholeList> {
                         context,
                         await NavigationMyStore
                             .navigationForwardToAllegroScreen(
-                                widget.items, context, index));
+                                widget.items,
+                                context,
+                                index,
+                                ProductsListBrain.displayMinPrize(
+                                    widget.euroRate,
+                                    widget.newRetail,
+                                    widget.margin,
+                                    widget.items
+                                        .elementAt(index)
+                                        .totalRetail)));
                   });
                 }
               },

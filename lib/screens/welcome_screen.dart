@@ -40,13 +40,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     MyOffersTable.createTableMyOffer();
     _loading = false;
     _setFiles();
-
     super.initState();
   }
 
   _setFiles() async {
     files = [];
     files = await WelcomeScreenBrain.getFiles();
+    print('moje pliki $files');
+  }
+
+  updateState() {
+    _setFiles();
+    setState(() {});
   }
 
   Future<void> createComputeFunction(String filePath) async {
@@ -57,8 +62,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     if (items == null) {
       WelcomeScreenBrain.showAlertIfFileIsWrong(context);
     } else {
-      bool result = await WelcomeScreenBrain.goToProductsList(
-          items, context, filePath, ProductsListBrain.getItemsTableName(items));
+      bool result = await WelcomeScreenBrain.goToProductsList(items, context,
+          filePath, ProductsListBrain.getItemsTableName(items), updateState);
       setState(() {
         if (result != false) {
           _setFiles();
@@ -125,7 +130,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     await ItemsTable.readItemsDataFromDBTable(widget.tableName);
                 Navigator.pop(context);
                 WelcomeScreenBrain.goToProductsList(
-                    items, context, filePath, files.elementAt(index));
+                    items, context, filePath, files.elementAt(index), updateState);
               },
             );
           },
@@ -161,7 +166,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   return;
                 }*/
                 bool result = await WelcomeScreenBrain.goToProductsList(
-                    items, context, widget.filePath, tableName);
+                    items, context, widget.filePath, tableName, updateState);
                 setState(() {
                   if (result != false) {
                     _setFiles();

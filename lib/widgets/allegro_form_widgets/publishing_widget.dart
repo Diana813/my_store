@@ -74,7 +74,7 @@ class PublishingPart extends StatelessWidget {
                 child: RaisedButtonMyStore(
                   paddingHorizontal: 50,
                   paddingVertical: 20,
-                  onClick: publishOffer,
+                  onClick: null/*publishOffer*/,
                   childWidget: Text(
                     'Wystaw aktywną ofertę',
                     style: TextStyle(fontSize: 18, color: Colors.white),
